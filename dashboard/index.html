@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seattle Creates — Impact Dashboard</title>
+
+  <!-- Inter typeface via Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js from CDN — no other JS dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- data.js sets window.DASHBOARD_DATA and works when the file is opened
+       directly (file://) as well as when served over HTTP. -->
+  <script src="./data.js"></script>
+
+  <style>
+    /* ------------------------------------------------------------------ */
+    /* DESIGN TOKENS                                                        */
+    /* ------------------------------------------------------------------ */
+    :root {
+      --purple:       #6B3FA0;   /* primary brand */
+      --purple-light: #9B6FD0;
+      --purple-dark:  #4A2875;
+      --coral:        #F4704B;   /* accent */
+      --coral-light:  #F8957A;
+      --cream:        #FDF8F3;
+      --gray-50:      #F9FAFB;
+      --gray-100:     #F3F4F6;
+      --gray-200:     #E5E7EB;
+      --gray-400:     #9CA3AF;
+      --gray-600:     #4B5563;
+      --gray-800:     #1F2937;
+      --white:        #FFFFFF;
+
+      --font: 'Inter', sans-serif;
+      --radius: 12px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 24px rgba(0,0,0,0.12);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* RESET + BASE                                                         */
+    /* ------------------------------------------------------------------ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--cream);
+      color: var(--gray-800);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    img { display: block; max-width: 100%; }
+
+    /* ------------------------------------------------------------------ */
+    /* LAYOUT UTILITIES                                                     */
+    /* ------------------------------------------------------------------ */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section { padding: 48px 0; }
+    .section + .section { padding-top: 0; }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--purple-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* HEADER                                                               */
+    /* ------------------------------------------------------------------ */
+    header {
+      background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-light) 100%);
+      color: var(--white);
+      padding: 0;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 24px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-logo {
+      width: 52px;
+      height: 52px;
+      background: var(--coral);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .header-org { font-size: 0.8rem; font-weight: 600; opacity: 0.75; letter-spacing: 0.1em; text-transform: uppercase; }
+    .header-title { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+    .header-subtitle { font-size: 0.9rem; opacity: 0.8; margin-top: 2px; }
+
+    .header-badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 0.82rem;
+      text-align: right;
+      line-height: 1.5;
+      flex-shrink: 0;
+    }
+
+    .header-badge strong { display: block; font-size: 1rem; }
+
+    /* ------------------------------------------------------------------ */
+    /* HERO STAT CARDS                                                      */
+    /* ------------------------------------------------------------------ */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--purple), var(--coral));
+    }
+
+    .stat-card.accent::before { background: var(--coral); }
+
+    .stat-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .stat-number {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--purple-dark);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-card.accent .stat-number { color: var(--coral); }
+
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* CHARTS ROW                                                           */
+    /* ------------------------------------------------------------------ */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1.5fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .chart-card { position: relative; }
+    .chart-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* ZIP / NEIGHBORHOOD TABLE                                             */
+    /* ------------------------------------------------------------------ */
+    .zip-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .zip-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .zip-table th, .zip-table td {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .zip-table th {
+      font-weight: 700;
+      color: var(--gray-600);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .zip-table tbody tr { border-bottom: 1px solid var(--gray-100); }
+    .zip-table tbody tr:last-child { border-bottom: none; }
+    .zip-table tbody tr:hover { background: var(--gray-50); }
+
+    .zip-table .rank {
+      color: var(--gray-400);
+      font-weight: 600;
+      width: 2rem;
+    }
+
+    .zip-bar-cell { width: 40%; padding-right: 10px; }
+
+    .zip-bar-track {
+      background: var(--gray-100);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .zip-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--purple), var(--purple-light));
+    }
+
+    .zip-count {
+      font-weight: 700;
+      color: var(--purple-dark);
+      text-align: right;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* STORIES FEED                                                         */
+    /* ------------------------------------------------------------------ */
+    .stories-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .story-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-left: 4px solid var(--coral);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .story-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .story-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .story-event {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--white);
+      background: var(--purple);
+      border-radius: 100px;
+      padding: 3px 10px;
+    }
+
+    .story-date {
+      font-size: 0.78rem;
+      color: var(--gray-400);
+    }
+
+    .story-text {
+      font-size: 0.92rem;
+      color: var(--gray-600);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    .story-quote-mark {
+      font-size: 2.5rem;
+      color: var(--coral-light);
+      line-height: 0.6;
+      font-family: Georgia, serif;
+      opacity: 0.5;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* VOLUNTEER HOURS BAR                                                  */
+    /* ------------------------------------------------------------------ */
+    .hours-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* EMPTY STATE                                                          */
+    /* ------------------------------------------------------------------ */
+    .empty-state {
+      padding: 32px;
+      text-align: center;
+      color: var(--gray-400);
+      font-size: 0.9rem;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* FOOTER                                                               */
+    /* ------------------------------------------------------------------ */
+    footer {
+      background: var(--purple-dark);
+      color: rgba(255,255,255,0.7);
+      padding: 24px 0;
+      margin-top: 16px;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.82rem;
+    }
+
+    footer strong { color: var(--white); }
+    footer a { color: var(--coral-light); text-decoration: none; }
+
+    /* ------------------------------------------------------------------ */
+    /* DIVIDER                                                              */
+    /* ------------------------------------------------------------------ */
+    .divider {
+      border: none;
+      border-top: 2px solid var(--gray-200);
+      margin: 0;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* RESPONSIVE                                                           */
+    /* ------------------------------------------------------------------ */
+    @media (max-width: 1100px) {
+      .charts-grid { grid-template-columns: 1fr 1fr; }
+      .hero-grid   { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .hero-grid       { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid     { grid-template-columns: 1fr; }
+      .zip-grid        { grid-template-columns: 1fr; }
+      .stories-grid    { grid-template-columns: 1fr; }
+      .hours-row       { grid-template-columns: 1fr; }
+      .header-title    { font-size: 1.3rem; }
+      .stat-number     { font-size: 2rem; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-grid   { grid-template-columns: 1fr; }
+      .container   { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ====================================================================== -->
+<!-- HEADER                                                                  -->
+<!-- ====================================================================== -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="header-logo" aria-hidden="true">🎨</div>
+        <div>
+          <div class="header-org">Seattle Creates</div>
+          <div class="header-title">Impact Dashboard</div>
+          <div class="header-subtitle">Program Outcomes &amp; Community Reach</div>
+        </div>
+      </div>
+      <div class="header-badge" id="header-period">
+        <strong id="header-respondents">— respondents</strong>
+        2026 Program Year
+      </div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ====================================================================== -->
+<!-- HERO STAT CARDS                                                         -->
+<!-- ====================================================================== -->
+<section class="section">
+  <div class="container">
+    <p class="section-title">At a Glance</p>
+    <div class="hero-grid" id="hero-grid">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ====================================================================== -->
+<!-- CHARTS ROW                                                              -->
+<!-- ====================================================================== -->
+<section class="section">
+  <div class="container">
+    <p class="section-title">Program Breakdown</p>
+    <div class="charts-grid">
+
+      <!-- Donut: Participants by Industry -->
+      <div class="card chart-card">
+        <h3>Participants by Industry</h3>
+        <div class="chart-wrapper" style="height:260px;">
+          <canvas id="chartDiscipline"></canvas>
+        </div>
+      </div>
+
+      <!-- Bar: Headcount per Event -->
+      <div class="card chart-card">
+        <h3>Headcount per Event</h3>
+        <div class="chart-wrapper" style="height:260px;">
+          <canvas id="chartHeadcount"></canvas>
+        </div>
+      </div>
+
+      <!-- Line: New vs Returning per Month -->
+      <div class="card chart-card">
+        <h3>New vs. Returning Participants</h3>
+        <div class="chart-wrapper" style="height:260px;">
+          <canvas id="chartNewReturning"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ====================================================================== -->
+<!-- NEIGHBORHOOD / ZIP TABLE + SECTOR TABLE                                 -->
+<!-- ====================================================================== -->
+<section class="section">
+  <div class="container">
+    <p class="section-title">Geographic &amp; Workforce Reach</p>
+    <div class="zip-grid">
+
+      <div class="card">
+        <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;">
+          Participants by Neighborhood / Zip
+        </h3>
+        <table class="zip-table" id="zipTable">
+          <thead>
+            <tr>
+              <th class="rank">#</th>
+              <th>Neighborhood</th>
+              <th class="zip-bar-cell"></th>
+              <th class="zip-count">Count</th>
+            </tr>
+          </thead>
+          <tbody id="zipTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;">
+          Top Skills Being Sought
+        </h3>
+        <div class="chart-wrapper" style="height:240px;">
+          <canvas id="chartSkills"></canvas>
+        </div>
+        <div style="margin-top:20px;">
+          <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:12px;">
+            Volunteer Hours by Quarter
+          </h3>
+          <div class="chart-wrapper" style="height:140px;">
+            <canvas id="chartVolHours"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ====================================================================== -->
+<!-- STORIES FEED                                                            -->
+<!-- ====================================================================== -->
+<section class="section">
+  <div class="container">
+    <p class="section-title">Notable Outcomes &amp; Stories</p>
+    <div class="stories-grid" id="storiesGrid">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- FOOTER                                                                  -->
+<!-- ====================================================================== -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <span>
+        <strong>Seattle Creates</strong> — Impact Dashboard
+      </span>
+      <span id="footer-updated">Last updated: —</span>
+      <span>Data syncs from Microsoft Forms via SharePoint</span>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ====================================================================== -->
+<!-- JAVASCRIPT — load data.json, render everything                          -->
+<!-- ====================================================================== -->
+<script>
+"use strict";
+
+/* ── Colour palettes ─────────────────────────────────────────────────── */
+const PURPLE       = "#6B3FA0";
+const PURPLE_LIGHT = "#9B6FD0";
+const CORAL        = "#F4704B";
+const CORAL_LIGHT  = "#F8957A";
+const GRAY_200     = "#E5E7EB";
+
+const DISCIPLINE_COLORS = [
+  PURPLE, CORAL, "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"
+];
+
+/* ── Number formatting ───────────────────────────────────────────────── */
+function fmt(n)    { return Number(n).toLocaleString(); }
+function fmtDollar(n) { return "$" + Number(n).toLocaleString(); }
+function fmtDecimal(n, d=1) { return Number(n).toFixed(d); }
+
+/* ── Hero stat cards ─────────────────────────────────────────────────── */
+function renderHero(totals) {
+  const stats = [
+    { icon: "👥", value: fmt(totals.participants),          label: "Participants",              accent: false },
+    { icon: "🎭", value: fmt(totals.artists_and_mentors),   label: "Teaching Artists & Mentors",accent: false },
+    { icon: "📅", value: fmt(totals.events || 0),           label: "Events Run",                accent: false },
+    { icon: "🤝", value: fmtDecimal(totals.volunteer_hours, 0), label: "Volunteer Hours",       accent: false },
+    { icon: "🚀", value: fmt(totals.career_placements),     label: "Career Placements",         accent: true  },
+  ];
+
+  const grid = document.getElementById("hero-grid");
+  grid.innerHTML = stats.map(s => `
+    <div class="stat-card ${s.accent ? "accent" : ""}">
+      <div class="stat-icon">${s.icon}</div>
+      <div class="stat-number">${s.value}</div>
+      <div class="stat-label">${s.label}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("header-respondents").textContent =
+    fmt(totals.total_respondents) + " total respondents";
+}
+
+/* ── Donut: Participants by Industry / Discipline ───────────────────── */
+function renderDisciplineChart(data) {
+  const labels = Object.keys(data);
+  const values = Object.values(data);
+  const total  = values.reduce((a, b) => a + b, 0);
+
+  new Chart(document.getElementById("chartDiscipline"), {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data:            values,
+        backgroundColor: DISCIPLINE_COLORS.slice(0, labels.length),
+        borderColor:     "#fff",
+        borderWidth:     3,
+        hoverOffset:     6,
+      }]
+    },
+    options: {
+      cutout: "65%",
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { font: { family: "Inter", size: 11 }, padding: 10, boxWidth: 12 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.parsed} (${Math.round(ctx.parsed/total*100)}%)`
+          }
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false,
+    }
+  });
+}
+
+/* ── Bar: Headcount per Event ───────────────────────────────────────── */
+function renderHeadcountChart(events) {
+  const labels = events.map(e => e.event.length > 22 ? e.event.slice(0, 22) + "…" : e.event);
+  const values = events.map(e => e.headcount);
+
+  new Chart(document.getElementById("chartHeadcount"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label:           "Attendees",
+        data:            values,
+        backgroundColor: values.map((_, i) => i % 2 === 0 ? PURPLE : PURPLE_LIGHT),
+        borderRadius:    4,
+        borderSkipped:   false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => events[items[0].dataIndex].event,
+            label: (ctx) => ` ${ctx.parsed.y} attendees`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { font: { family: "Inter", size: 10 }, maxRotation: 45 },
+          grid:  { display: false }
+        },
+        y: {
+          ticks: { font: { family: "Inter", size: 11 } },
+          grid:  { color: GRAY_200 },
+          beginAtZero: true,
+        }
+      }
+    }
+  });
+}
+
+/* ── Line: New vs Returning ─────────────────────────────────────────── */
+function renderNewReturningChart(data) {
+  const months   = Object.keys(data).sort();
+  const newData  = months.map(m => data[m].new      || 0);
+  const retData  = months.map(m => data[m].returning || 0);
+
+  // Pretty-print month labels: "2026-04" → "Apr"
+  const labels = months.map(m => {
+    const [y, mo] = m.split("-");
+    return new Date(Number(y), Number(mo) - 1, 1)
+      .toLocaleString("en-US", { month: "short" });
+  });
+
+  new Chart(document.getElementById("chartNewReturning"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label:           "New",
+          data:            newData,
+          borderColor:     PURPLE,
+          backgroundColor: PURPLE + "22",
+          fill:            true,
+          tension:         0.4,
+          pointRadius:     4,
+          pointHoverRadius:6,
+        },
+        {
+          label:           "Returning",
+          data:            retData,
+          borderColor:     CORAL,
+          backgroundColor: CORAL + "22",
+          fill:            true,
+          tension:         0.4,
+          pointRadius:     4,
+          pointHoverRadius:6,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { font: { family: "Inter", size: 11 }, padding: 12, boxWidth: 12 }
+        }
+      },
+      scales: {
+        x: { ticks: { font: { family: "Inter", size: 11 } }, grid: { display: false } },
+        y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { color: GRAY_200 }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+/* ── Ranked table: Participants by Zip ──────────────────────────────── */
+function renderZipTable(data) {
+  const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  const max     = entries[0]?.[1] || 1;
+  const tbody   = document.getElementById("zipTableBody");
+
+  tbody.innerHTML = entries.map(([zip, count], i) => `
+    <tr>
+      <td class="rank">${i + 1}</td>
+      <td>${zip}</td>
+      <td class="zip-bar-cell">
+        <div class="zip-bar-track">
+          <div class="zip-bar-fill" style="width:${Math.round(count/max*100)}%"></div>
+        </div>
+      </td>
+      <td class="zip-count">${count}</td>
+    </tr>
+  `).join("");
+}
+
+/* ── Horizontal bar: Top Skills Being Sought ─────────────────────────── */
+function renderSkillsChart(data) {
+  // Show top 8 skills maximum so bars aren't too cramped
+  const entries = Object.entries(data).slice(0, 8);
+  const labels  = entries.map(([k]) => k);
+  const values  = entries.map(([, v]) => v);
+
+  new Chart(document.getElementById("chartSkills"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label:           "Respondents",
+        data:            values,
+        backgroundColor: labels.map((_, i) => DISCIPLINE_COLORS[i % DISCIPLINE_COLORS.length]),
+        borderRadius:    4,
+        borderSkipped:   false,
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: { font: { family: "Inter", size: 11 }, stepSize: 1 },
+          grid:  { color: GRAY_200 },
+          beginAtZero: true,
+        },
+        y: {
+          ticks: { font: { family: "Inter", size: 11 } },
+          grid:  { display: false },
+        }
+      }
+    }
+  });
+}
+
+/* ── Bar: Volunteer Hours by Quarter ────────────────────────────────── */
+function renderVolHoursChart(data) {
+  const labels = Object.keys(data);
+  const values = Object.values(data);
+
+  new Chart(document.getElementById("chartVolHours"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label:           "Hours",
+        data:            values,
+        backgroundColor: CORAL_LIGHT,
+        borderRadius:    4,
+        borderSkipped:   false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} hrs` } }
+      },
+      scales: {
+        x: { ticks: { font: { family: "Inter", size: 11 } }, grid: { display: false } },
+        y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { color: GRAY_200 }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+/* ── Stories feed ────────────────────────────────────────────────────── */
+function renderStories(stories) {
+  const grid = document.getElementById("storiesGrid");
+
+  if (!stories || stories.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      No notable outcomes recorded yet.
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = stories.map(s => `
+    <div class="story-card">
+      <div class="story-meta">
+        <span class="story-event">${s.event || "Event"}</span>
+        ${s.date ? `<span class="story-date">${s.date}</span>` : ""}
+      </div>
+      <div class="story-quote-mark">"</div>
+      <p class="story-text">${s.story}</p>
+    </div>
+  `).join("");
+}
+
+/* ── Footer timestamp ────────────────────────────────────────────────── */
+function renderFooter(generatedAt) {
+  const d = new Date(generatedAt);
+  const formatted = isNaN(d)
+    ? generatedAt
+    : d.toLocaleString("en-US", {
+        month: "long", day: "numeric", year: "numeric",
+        hour: "numeric", minute: "2-digit", timeZoneName: "short"
+      });
+  document.getElementById("footer-updated").textContent =
+    "Last updated: " + formatted;
+}
+
+/* ── Main: load data and render all components ───────────────────────── */
+async function main() {
+  let data;
+
+  // Prefer the inline script bundle (works with file:// and HTTP alike).
+  // Fall back to fetch() when served over HTTP and data.js isn't present.
+  if (window.DASHBOARD_DATA) {
+    data = window.DASHBOARD_DATA;
+  } else {
+    try {
+      const res = await fetch("./data.json");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+    } catch (err) {
+      document.body.innerHTML = `
+        <div style="padding:60px;text-align:center;font-family:Inter,sans-serif;">
+          <h2 style="color:#6B3FA0">Could not load dashboard data</h2>
+          <p style="color:#4B5563;margin-top:16px;line-height:1.7;">
+            <strong>If you just double-clicked index.html:</strong><br/>
+            Run the agent first — it writes <code>data.js</code> next to this file.<br/><br/>
+            <strong>If you're on a server and seeing this:</strong><br/>
+            Make sure <code>dashboard/data.json</code> exists.<br/><br/>
+            Error: ${err.message}
+          </p>
+        </div>`;
+      return;
+    }
+  }
+
+  const { metrics, generated_at } = data;
+  const { totals, breakdowns, trends, stories } = metrics;
+
+  renderHero(totals);
+  renderDisciplineChart(breakdowns.by_industry);
+  renderHeadcountChart(trends.headcount_per_event);
+  renderNewReturningChart(trends.new_vs_returning_by_month);
+  renderZipTable(breakdowns.by_zip);
+  renderSkillsChart(breakdowns.skills_sought);
+  renderVolHoursChart(trends.volunteer_hours_by_quarter);
+  renderStories(stories);
+  renderFooter(generated_at);
+}
+
+main();
+</script>
+</body>
+</html>

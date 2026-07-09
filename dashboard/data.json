@@ -1,0 +1,146 @@
+{
+  "generated_at": "2026-07-09T00:00:00+00:00",
+  "source": "Sample data — replace by running agent/agent.py",
+  "metrics": {
+    "totals": {
+      "total_respondents": 312,
+      "participants": 247,
+      "teaching_artists": 18,
+      "mentors": 9,
+      "artists_and_mentors": 27,
+      "volunteers": 44,
+      "got_job_or_gig": 23,
+      "launched_business": 8,
+      "career_placements": 31,
+      "alumni": 89,
+      "seeking_mentorship": 104,
+      "became_teaching_artist": 18,
+      "volunteer_hours": 386.5,
+      "events": 14
+    },
+    "breakdowns": {
+      "by_industry": {
+        "Music / Audio Production": 94,
+        "Visual Art & Design": 71,
+        "Dance & Movement": 58,
+        "Film & Media": 42,
+        "Theatre & Performance": 31,
+        "Literary Arts": 16
+      },
+      "by_zip": {
+        "98122 (Central District)": 87,
+        "98144 (Beacon Hill)": 64,
+        "98118 (Columbia City)": 51,
+        "98108 (Georgetown)": 39,
+        "98106 (Delridge)": 27,
+        "98126 (West Seattle)": 22,
+        "Other / Not collected": 22
+      },
+      "alumni_vs_non": {
+        "Alumni": 89,
+        "Non-Alumni": 223
+      },
+      "returning_vs_new": {
+        "Returning": 127,
+        "First-time": 185
+      },
+      "skills_sought": {
+        "Music production": 68,
+        "Business/entrepreneurship": 54,
+        "Networking": 49,
+        "Grant writing": 41,
+        "Branding & marketing": 37,
+        "Video editing": 29,
+        "Public speaking": 22,
+        "Financial literacy": 18
+      }
+    },
+    "trends": {
+      "new_vs_returning_by_month": {
+        "2026-02": { "new": 28, "returning": 5 },
+        "2026-03": { "new": 41, "returning": 14 },
+        "2026-04": { "new": 53, "returning": 22 },
+        "2026-05": { "new": 47, "returning": 31 },
+        "2026-06": { "new": 38, "returning": 33 },
+        "2026-07": { "new": 12, "returning": 8 }
+      },
+      "submissions_by_month": {
+        "2026-02": 33,
+        "2026-03": 55,
+        "2026-04": 75,
+        "2026-05": 78,
+        "2026-06": 71,
+        "2026-07": 20
+      },
+      "outcomes_by_month": {
+        "2026-03": { "job_gig": 2, "business": 0 },
+        "2026-04": { "job_gig": 5, "business": 1 },
+        "2026-05": { "job_gig": 8, "business": 3 },
+        "2026-06": { "job_gig": 6, "business": 3 },
+        "2026-07": { "job_gig": 2, "business": 1 }
+      },
+      "ta_conversions_by_month": {
+        "2026-03": 2,
+        "2026-04": 5,
+        "2026-05": 4,
+        "2026-06": 6,
+        "2026-07": 1
+      },
+      "volunteer_hours_by_quarter": {
+        "2026-Q1": 98.5,
+        "2026-Q2": 211.0,
+        "2026-Q3": 77.0
+      },
+      "headcount_per_event": [
+        { "event": "Winter Kickoff Showcase",    "date": "2026-02-14", "headcount": 112 },
+        { "event": "Open Studio: March",         "date": "2026-03-07", "headcount": 68  },
+        { "event": "Artist Talk — Film & Media", "date": "2026-03-21", "headcount": 54  },
+        { "event": "Spring Intensive Day 1",     "date": "2026-04-04", "headcount": 145 },
+        { "event": "Spring Intensive Day 2",     "date": "2026-04-05", "headcount": 138 },
+        { "event": "Career Panel",               "date": "2026-04-19", "headcount": 79  },
+        { "event": "Community Mural Unveiling",  "date": "2026-05-02", "headcount": 203 },
+        { "event": "Open Studio: May",           "date": "2026-05-16", "headcount": 71  },
+        { "event": "Youth Showcase",             "date": "2026-05-30", "headcount": 167 },
+        { "event": "Mentor Match Mixer",         "date": "2026-06-06", "headcount": 88  },
+        { "event": "Dance Residency Finale",     "date": "2026-06-14", "headcount": 122 },
+        { "event": "Summer Kickoff",             "date": "2026-06-27", "headcount": 194 },
+        { "event": "Music Studio Sessions",      "date": "2026-07-04", "headcount": 56  },
+        { "event": "Funder Preview",             "date": "2026-07-09", "headcount": 41  }
+      ]
+    },
+    "stories": [
+      {
+        "event": "Youth Showcase",
+        "date": "May 2026",
+        "story": "Maya landed a job, gig, or new opportunity and launched a new business or venture through their involvement with Seattle Creates."
+      },
+      {
+        "event": "Community Mural Unveiling",
+        "date": "May 2026",
+        "story": "The Delridge neighborhood mural — designed collaboratively by 14 youth participants over six weeks — was covered by The Stranger and cited by City Council member Tammy Morales as a model community arts project."
+      },
+      {
+        "event": "Mentor Match Mixer",
+        "date": "June 2026",
+        "story": "Three participants secured paid internships directly through connections made at this event, including one placement at a local film production company."
+      },
+      {
+        "event": "Dance Residency Finale",
+        "date": "June 2026",
+        "story": "Darius became a Teaching Artist through their involvement with Seattle Creates. Two participants have since joined his professional company's youth ensemble."
+      },
+      {
+        "event": "Career Panel",
+        "date": "April 2026",
+        "story": "Jordan launched a new business or venture through their involvement with Seattle Creates — a freelance graphic design studio that landed its first client within 30 days."
+      }
+    ]
+  },
+  "raw": {
+    "participants": [],
+    "artists": [],
+    "mentors": [],
+    "volunteers": [],
+    "career": []
+  }
+}
