@@ -1,35 +1,19 @@
-# --- Secrets (NEVER commit these) ---
-agent/.env
+# Secrets — never commit these
+.env
 *.env
 *.env.*
 !.env.example
 
-# --- Real participant data (contains PII) ---
-# Only commit sample/anonymized versions of these files.
-# After running the agent against real data, do NOT commit them.
-# Uncomment the lines below to block them entirely:
-# dashboard/data.json
-# dashboard/data.js
+# Node
+node_modules/
+npm-debug.log*
 
-# --- Python ---
-__pycache__/
-*.py[cod]
-*.pyo
-.venv/
-venv/
-env/
-*.egg-info/
-dist/
-build/
-.pytest_cache/
-
-# --- OS ---
+# OS
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# --- Editor ---
+# Editor
 .vscode/
 .idea/
 *.swp
-*.swo

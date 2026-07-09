@@ -5,27 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Seattle Creates — Impact Dashboard</title>
 
-  <!-- Inter typeface via Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Chart.js from CDN — no other JS dependencies -->
+  <!-- Chart.js for all charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
-  <!-- data.js sets window.DASHBOARD_DATA and works when the file is opened
-       directly (file://) as well as when served over HTTP. -->
-  <script src="./data.js"></script>
+  <!-- Supabase JS client — reads live data from the database.
+       The anon key used below is safe to expose in client-side code because
+       Row Level Security (RLS) prevents any writes from the browser. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* ------------------------------------------------------------------ */
-    /* DESIGN TOKENS                                                        */
-    /* ------------------------------------------------------------------ */
+    /* ── DESIGN TOKENS ──────────────────────────────────────── */
     :root {
-      --purple:       #6B3FA0;   /* primary brand */
+      --purple:       #6B3FA0;
       --purple-light: #9B6FD0;
       --purple-dark:  #4A2875;
-      --coral:        #F4704B;   /* accent */
+      --coral:        #F4704B;
       --coral-light:  #F8957A;
       --cream:        #FDF8F3;
       --gray-50:      #F9FAFB;
@@ -35,16 +33,12 @@
       --gray-600:     #4B5563;
       --gray-800:     #1F2937;
       --white:        #FFFFFF;
-
-      --font: 'Inter', sans-serif;
-      --radius: 12px;
-      --shadow: 0 2px 12px rgba(0,0,0,0.08);
-      --shadow-md: 0 4px 24px rgba(0,0,0,0.12);
+      --font:         'Inter', sans-serif;
+      --radius:       12px;
+      --shadow:       0 2px 12px rgba(0,0,0,0.08);
+      --shadow-md:    0 4px 24px rgba(0,0,0,0.12);
     }
 
-    /* ------------------------------------------------------------------ */
-    /* RESET + BASE                                                         */
-    /* ------------------------------------------------------------------ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -52,29 +46,18 @@
       background: var(--cream);
       color: var(--gray-800);
       line-height: 1.6;
-      min-height: 100vh;
     }
 
-    img { display: block; max-width: 100%; }
-
-    /* ------------------------------------------------------------------ */
-    /* LAYOUT UTILITIES                                                     */
-    /* ------------------------------------------------------------------ */
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    .section { padding: 48px 0; }
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .container    { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+    .section      { padding: 48px 0; }
     .section + .section { padding-top: 0; }
+    .divider      { border: none; border-top: 2px solid var(--gray-200); }
 
     .section-title {
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1.1rem; font-weight: 700;
       color: var(--purple-dark);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      text-transform: uppercase; letter-spacing: 0.08em;
       margin-bottom: 20px;
     }
 
@@ -85,341 +68,160 @@
       padding: 24px;
     }
 
-    /* ------------------------------------------------------------------ */
-    /* HEADER                                                               */
-    /* ------------------------------------------------------------------ */
+    /* ── HEADER ─────────────────────────────────────────────── */
     header {
       background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-light) 100%);
       color: var(--white);
-      padding: 0;
     }
-
     .header-inner {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       justify-content: space-between;
-      padding: 28px 24px;
-      gap: 24px;
-      flex-wrap: wrap;
+      padding: 28px 24px; gap: 24px; flex-wrap: wrap;
     }
-
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .header-brand { display: flex; align-items: center; gap: 16px; }
+    .header-logo  {
+      width: 52px; height: 52px; background: var(--coral);
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 1.6rem; flex-shrink: 0;
     }
-
-    .header-logo {
-      width: 52px;
-      height: 52px;
-      background: var(--coral);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      flex-shrink: 0;
-    }
-
-    .header-org { font-size: 0.8rem; font-weight: 600; opacity: 0.75; letter-spacing: 0.1em; text-transform: uppercase; }
-    .header-title { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+    .header-org      { font-size: 0.8rem; font-weight: 600; opacity: 0.75; letter-spacing: 0.1em; text-transform: uppercase; }
+    .header-title    { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
     .header-subtitle { font-size: 0.9rem; opacity: 0.8; margin-top: 2px; }
-
-    .header-badge {
+    .header-badge    {
       background: rgba(255,255,255,0.15);
       border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 8px;
-      padding: 10px 18px;
-      font-size: 0.82rem;
-      text-align: right;
-      line-height: 1.5;
-      flex-shrink: 0;
+      border-radius: 8px; padding: 10px 18px;
+      font-size: 0.82rem; text-align: right; line-height: 1.5; flex-shrink: 0;
     }
-
     .header-badge strong { display: block; font-size: 1rem; }
 
-    /* ------------------------------------------------------------------ */
-    /* HERO STAT CARDS                                                      */
-    /* ------------------------------------------------------------------ */
+    /* live indicator dot */
+    .live-dot {
+      display: inline-block; width: 8px; height: 8px;
+      background: #4ADE80; border-radius: 50%;
+      margin-right: 6px; animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    /* ── HERO STAT CARDS ────────────────────────────────────── */
     .hero-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 16px;
     }
-
     .stat-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 24px 20px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 24px 20px; text-align: center;
+      position: relative; overflow: hidden;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 4px;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
       background: linear-gradient(90deg, var(--purple), var(--coral));
     }
-
     .stat-card.accent::before { background: var(--coral); }
-
-    .stat-icon {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-    }
-
-    .stat-number {
-      font-size: 2.4rem;
-      font-weight: 800;
-      color: var(--purple-dark);
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
+    .stat-icon   { font-size: 1.8rem; margin-bottom: 10px; }
+    .stat-number { font-size: 2.4rem; font-weight: 800; color: var(--purple-dark); line-height: 1; margin-bottom: 6px; }
     .stat-card.accent .stat-number { color: var(--coral); }
+    .stat-label  { font-size: 0.78rem; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.06em; }
 
-    .stat-label {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--gray-600);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* CHARTS ROW                                                           */
-    /* ------------------------------------------------------------------ */
+    /* ── CHARTS ROW ─────────────────────────────────────────── */
     .charts-grid {
       display: grid;
       grid-template-columns: 1fr 2fr 1.5fr;
-      gap: 20px;
-      align-items: start;
+      gap: 20px; align-items: start;
     }
+    .chart-card h3 { font-size: 0.9rem; font-weight: 700; color: var(--gray-800); margin-bottom: 16px; }
+    .chart-wrapper { position: relative; width: 100%; }
 
-    .chart-card { position: relative; }
-    .chart-card h3 {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--gray-800);
-      margin-bottom: 16px;
-    }
+    /* ── SKILLS & MENTORSHIP ────────────────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-    .chart-wrapper {
-      position: relative;
-      width: 100%;
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* ZIP / NEIGHBORHOOD TABLE                                             */
-    /* ------------------------------------------------------------------ */
-    .zip-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    .zip-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .zip-table th, .zip-table td {
-      padding: 10px 14px;
-      text-align: left;
-      font-size: 0.88rem;
-    }
-
-    .zip-table th {
-      font-weight: 700;
-      color: var(--gray-600);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    /* ranked table */
+    .ranked-table { width: 100%; border-collapse: collapse; }
+    .ranked-table th, .ranked-table td { padding: 10px 14px; text-align: left; font-size: 0.88rem; }
+    .ranked-table th {
+      font-weight: 700; color: var(--gray-600);
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;
       border-bottom: 2px solid var(--gray-200);
     }
+    .ranked-table tbody tr { border-bottom: 1px solid var(--gray-100); }
+    .ranked-table tbody tr:last-child { border-bottom: none; }
+    .ranked-table tbody tr:hover { background: var(--gray-50); }
+    .rank { color: var(--gray-400); font-weight: 600; width: 2rem; }
+    .bar-cell  { width: 40%; padding-right: 10px; }
+    .bar-track { background: var(--gray-100); border-radius: 4px; height: 8px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--purple), var(--purple-light)); }
+    .count-cell { font-weight: 700; color: var(--purple-dark); text-align: right; }
 
-    .zip-table tbody tr { border-bottom: 1px solid var(--gray-100); }
-    .zip-table tbody tr:last-child { border-bottom: none; }
-    .zip-table tbody tr:hover { background: var(--gray-50); }
-
-    .zip-table .rank {
-      color: var(--gray-400);
-      font-weight: 600;
-      width: 2rem;
-    }
-
-    .zip-bar-cell { width: 40%; padding-right: 10px; }
-
-    .zip-bar-track {
-      background: var(--gray-100);
-      border-radius: 4px;
-      height: 8px;
-      overflow: hidden;
-    }
-
-    .zip-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      background: linear-gradient(90deg, var(--purple), var(--purple-light));
-    }
-
-    .zip-count {
-      font-weight: 700;
-      color: var(--purple-dark);
-      text-align: right;
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* STORIES FEED                                                         */
-    /* ------------------------------------------------------------------ */
-    .stories-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
+    /* ── STORIES FEED ───────────────────────────────────────── */
+    .stories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .story-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 22px;
+      display: flex; flex-direction: column; gap: 12px;
       border-left: 4px solid var(--coral);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-
-    .story-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .story-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .story-event {
-      font-size: 0.78rem;
-      font-weight: 700;
+    .story-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .story-meta  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .story-name  { font-size: 0.78rem; font-weight: 700; color: var(--white); background: var(--purple); border-radius: 100px; padding: 3px 10px; }
+    .story-role  { font-size: 0.78rem; color: var(--gray-400); }
+    .story-outcomes { display: flex; flex-wrap: wrap; gap: 6px; }
+    .outcome-chip {
+      font-size: 0.72rem; font-weight: 600; padding: 2px 8px;
+      border-radius: 100px; background: var(--coral-light);
       color: var(--white);
-      background: var(--purple);
-      border-radius: 100px;
-      padding: 3px 10px;
     }
+    .story-industry { font-size: 0.82rem; color: var(--gray-600); font-style: italic; }
+    .story-quote { font-size: 2rem; color: var(--coral-light); line-height: 0.6; font-family: Georgia, serif; opacity: 0.5; }
 
-    .story-date {
-      font-size: 0.78rem;
-      color: var(--gray-400);
+    /* ── LOADING STATE ──────────────────────────────────────── */
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      padding: 80px 0; flex-direction: column; gap: 16px;
+      color: var(--gray-400); font-size: 0.9rem;
     }
-
-    .story-text {
-      font-size: 0.92rem;
-      color: var(--gray-600);
-      line-height: 1.65;
-      flex: 1;
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--gray-200);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .story-quote-mark {
-      font-size: 2.5rem;
-      color: var(--coral-light);
-      line-height: 0.6;
-      font-family: Georgia, serif;
-      opacity: 0.5;
-    }
+    .empty-state { padding: 32px; text-align: center; color: var(--gray-400); font-size: 0.9rem; }
 
-    /* ------------------------------------------------------------------ */
-    /* VOLUNTEER HOURS BAR                                                  */
-    /* ------------------------------------------------------------------ */
-    .hours-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* EMPTY STATE                                                          */
-    /* ------------------------------------------------------------------ */
-    .empty-state {
-      padding: 32px;
-      text-align: center;
-      color: var(--gray-400);
-      font-size: 0.9rem;
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* FOOTER                                                               */
-    /* ------------------------------------------------------------------ */
-    footer {
-      background: var(--purple-dark);
-      color: rgba(255,255,255,0.7);
-      padding: 24px 0;
-      margin-top: 16px;
-    }
-
-    .footer-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      font-size: 0.82rem;
-    }
-
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    footer { background: var(--purple-dark); color: rgba(255,255,255,0.7); padding: 24px 0; margin-top: 16px; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 0.82rem; }
     footer strong { color: var(--white); }
-    footer a { color: var(--coral-light); text-decoration: none; }
 
-    /* ------------------------------------------------------------------ */
-    /* DIVIDER                                                              */
-    /* ------------------------------------------------------------------ */
-    .divider {
-      border: none;
-      border-top: 2px solid var(--gray-200);
-      margin: 0;
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* RESPONSIVE                                                           */
-    /* ------------------------------------------------------------------ */
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
     @media (max-width: 1100px) {
       .charts-grid { grid-template-columns: 1fr 1fr; }
       .hero-grid   { grid-template-columns: repeat(3, 1fr); }
     }
-
     @media (max-width: 768px) {
-      .hero-grid       { grid-template-columns: repeat(2, 1fr); }
-      .charts-grid     { grid-template-columns: 1fr; }
-      .zip-grid        { grid-template-columns: 1fr; }
-      .stories-grid    { grid-template-columns: 1fr; }
-      .hours-row       { grid-template-columns: 1fr; }
-      .header-title    { font-size: 1.3rem; }
-      .stat-number     { font-size: 2rem; }
+      .hero-grid    { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid  { grid-template-columns: 1fr; }
+      .two-col      { grid-template-columns: 1fr; }
+      .stories-grid { grid-template-columns: 1fr; }
     }
-
     @media (max-width: 480px) {
-      .hero-grid   { grid-template-columns: 1fr; }
-      .container   { padding: 0 16px; }
+      .hero-grid  { grid-template-columns: 1fr; }
+      .container  { padding: 0 16px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ====================================================================== -->
-<!-- HEADER                                                                  -->
-<!-- ====================================================================== -->
+<!-- ── HEADER ──────────────────────────────────────────────── -->
 <header>
   <div class="container">
     <div class="header-inner">
@@ -431,58 +233,53 @@
           <div class="header-subtitle">Program Outcomes &amp; Community Reach</div>
         </div>
       </div>
-      <div class="header-badge" id="header-period">
-        <strong id="header-respondents">— respondents</strong>
-        2026 Program Year
+      <div class="header-badge">
+        <strong id="header-count">Loading…</strong>
+        <span><span class="live-dot"></span>Live from Supabase</span>
       </div>
     </div>
   </div>
 </header>
 
 
-<!-- ====================================================================== -->
-<!-- HERO STAT CARDS                                                         -->
-<!-- ====================================================================== -->
+<!-- ── HERO STAT CARDS ─────────────────────────────────────── -->
 <section class="section">
   <div class="container">
     <p class="section-title">At a Glance</p>
     <div class="hero-grid" id="hero-grid">
-      <!-- Injected by JS -->
+      <div class="loading" style="grid-column:1/-1;padding:40px 0;">
+        <div class="spinner"></div><span>Loading data…</span>
+      </div>
     </div>
   </div>
 </section>
 
 <hr class="divider" />
 
-<!-- ====================================================================== -->
-<!-- CHARTS ROW                                                              -->
-<!-- ====================================================================== -->
+<!-- ── CHARTS ROW ──────────────────────────────────────────── -->
 <section class="section">
   <div class="container">
-    <p class="section-title">Program Breakdown</p>
+    <p class="section-title">Ecosystem Breakdown</p>
     <div class="charts-grid">
 
-      <!-- Donut: Participants by Industry -->
       <div class="card chart-card">
-        <h3>Participants by Industry</h3>
+        <h3>Respondents by Industry</h3>
         <div class="chart-wrapper" style="height:260px;">
-          <canvas id="chartDiscipline"></canvas>
+          <canvas id="chartIndustry"></canvas>
         </div>
       </div>
 
-      <!-- Bar: Headcount per Event -->
       <div class="card chart-card">
-        <h3>Headcount per Event</h3>
+        <h3>Responses by Role</h3>
         <div class="chart-wrapper" style="height:260px;">
-          <canvas id="chartHeadcount"></canvas>
+          <canvas id="chartRoles"></canvas>
         </div>
       </div>
 
-      <!-- Line: New vs Returning per Month -->
       <div class="card chart-card">
-        <h3>New vs. Returning Participants</h3>
+        <h3>Form Responses Over Time</h3>
         <div class="chart-wrapper" style="height:260px;">
-          <canvas id="chartNewReturning"></canvas>
+          <canvas id="chartTimeline"></canvas>
         </div>
       </div>
 
@@ -492,44 +289,42 @@
 
 <hr class="divider" />
 
-<!-- ====================================================================== -->
-<!-- NEIGHBORHOOD / ZIP TABLE + SECTOR TABLE                                 -->
-<!-- ====================================================================== -->
+<!-- ── SKILLS & MENTORSHIP ─────────────────────────────────── -->
 <section class="section">
   <div class="container">
-    <p class="section-title">Geographic &amp; Workforce Reach</p>
-    <div class="zip-grid">
-
-      <div class="card">
-        <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;">
-          Participants by Neighborhood / Zip
-        </h3>
-        <table class="zip-table" id="zipTable">
-          <thead>
-            <tr>
-              <th class="rank">#</th>
-              <th>Neighborhood</th>
-              <th class="zip-bar-cell"></th>
-              <th class="zip-count">Count</th>
-            </tr>
-          </thead>
-          <tbody id="zipTableBody"></tbody>
-        </table>
-      </div>
+    <p class="section-title">Skills &amp; Mentorship</p>
+    <div class="two-col">
 
       <div class="card">
         <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;">
           Top Skills Being Sought
         </h3>
-        <div class="chart-wrapper" style="height:240px;">
-          <canvas id="chartSkills"></canvas>
+        <table class="ranked-table">
+          <thead>
+            <tr>
+              <th class="rank">#</th>
+              <th>Skill</th>
+              <th class="bar-cell"></th>
+              <th class="count-cell">Count</th>
+            </tr>
+          </thead>
+          <tbody id="skillsTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;">
+          Mentorship Demand
+        </h3>
+        <div class="chart-wrapper" style="height:200px;">
+          <canvas id="chartMentorship"></canvas>
         </div>
-        <div style="margin-top:20px;">
+        <div style="margin-top:24px;">
           <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:12px;">
-            Volunteer Hours by Quarter
+            Alumni vs. First-Generation
           </h3>
           <div class="chart-wrapper" style="height:140px;">
-            <canvas id="chartVolHours"></canvas>
+            <canvas id="chartAlumni"></canvas>
           </div>
         </div>
       </div>
@@ -540,68 +335,169 @@
 
 <hr class="divider" />
 
-<!-- ====================================================================== -->
-<!-- STORIES FEED                                                            -->
-<!-- ====================================================================== -->
+<!-- ── STORIES / OUTCOMES FEED ─────────────────────────────── -->
 <section class="section">
   <div class="container">
-    <p class="section-title">Notable Outcomes &amp; Stories</p>
+    <p class="section-title">Outcomes &amp; Success Stories</p>
     <div class="stories-grid" id="storiesGrid">
-      <!-- Injected by JS -->
+      <div class="loading" style="grid-column:1/-1;padding:40px 0;">
+        <div class="spinner"></div><span>Loading stories…</span>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ====================================================================== -->
-<!-- FOOTER                                                                  -->
-<!-- ====================================================================== -->
+<!-- ── FOOTER ──────────────────────────────────────────────── -->
 <footer>
   <div class="container">
     <div class="footer-inner">
-      <span>
-        <strong>Seattle Creates</strong> — Impact Dashboard
-      </span>
-      <span id="footer-updated">Last updated: —</span>
-      <span>Data syncs from Microsoft Forms via SharePoint</span>
+      <span><strong>Seattle Creates</strong> — Impact Dashboard</span>
+      <span id="footer-updated">Fetching data…</span>
+      <span><span class="live-dot"></span>Live data — powered by Supabase</span>
     </div>
   </div>
 </footer>
 
 
-<!-- ====================================================================== -->
-<!-- JAVASCRIPT — load data.json, render everything                          -->
-<!-- ====================================================================== -->
+<!-- ================================================================ -->
+<!-- JAVASCRIPT                                                        -->
+<!-- ================================================================ -->
 <script>
 "use strict";
 
-/* ── Colour palettes ─────────────────────────────────────────────────── */
+// ── SUPABASE CONFIG ───────────────────────────────────────────────
+// REPLACE these two values with your real project credentials.
+// Find them at: supabase.com → your project → Project Settings → API
+//
+// The ANON key is safe to expose here — Row Level Security (RLS)
+// means the browser can only READ data, never write.
+
+const SUPABASE_URL      = "https://YOUR_PROJECT_ID.supabase.co";  // ← REPLACE
+const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE";                   // ← REPLACE
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── COLOUR PALETTE ────────────────────────────────────────────────
 const PURPLE       = "#6B3FA0";
 const PURPLE_LIGHT = "#9B6FD0";
 const CORAL        = "#F4704B";
 const CORAL_LIGHT  = "#F8957A";
 const GRAY_200     = "#E5E7EB";
 
-const DISCIPLINE_COLORS = [
-  PURPLE, CORAL, "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"
+const PALETTE = [
+  PURPLE, CORAL, "#3B82F6", "#10B981", "#F59E0B",
+  "#EF4444", "#8B5CF6", "#06B6D4", "#84CC16", "#F97316"
 ];
 
-/* ── Number formatting ───────────────────────────────────────────────── */
-function fmt(n)    { return Number(n).toLocaleString(); }
-function fmtDollar(n) { return "$" + Number(n).toLocaleString(); }
-function fmtDecimal(n, d=1) { return Number(n).toFixed(d); }
+// ── NUMBER FORMATTING ─────────────────────────────────────────────
+const fmt  = n => Number(n).toLocaleString();
+const isYes = v => (v || "").trim().toLowerCase() === "yes";
 
-/* ── Hero stat cards ─────────────────────────────────────────────────── */
+// ── METRIC COMPUTATION ────────────────────────────────────────────
+// Takes the raw array of rows from Supabase and derives every
+// number, breakdown, and list the dashboard needs to display.
+
+function computeMetrics(rows) {
+
+  // --- Dedup by name (case-insensitive) for unique respondent count ---
+  const seen   = new Set();
+  const unique = rows.filter(r => {
+    const key = (r.name || "").trim().toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // --- Hero totals ---
+  const totals = {
+    respondents:      unique.length,
+    teachingArtists:  unique.filter(r => (r.role || "").includes("Teaching Artist")).length,
+    gotJob:           rows.filter(r => isYes(r.got_job_or_opportunity)).length,
+    launchedBiz:      rows.filter(r => isYes(r.launched_business)).length,
+    returning:        rows.filter(r => isYes(r.has_returned)).length,
+  };
+
+  // --- By industry (donut chart) ---
+  const industryMap = {};
+  rows.forEach(r => {
+    const ind = (r.industry || "").trim() || "Other";
+    industryMap[ind] = (industryMap[ind] || 0) + 1;
+  });
+
+  // --- By role (bar chart) — split comma-separated multi-select ---
+  const roleMap = {};
+  rows.forEach(r => {
+    (r.role || "").split(",").map(s => s.trim()).filter(Boolean).forEach(role => {
+      roleMap[role] = (roleMap[role] || 0) + 1;
+    });
+  });
+
+  // --- Responses over time (line chart) — group by YYYY-MM ---
+  const timeMap = {};
+  rows.forEach(r => {
+    const dt  = new Date(r.submitted_at);
+    const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+    timeMap[key] = (timeMap[key] || 0) + 1;
+  });
+
+  // --- Top skills (table) — split free text by newline / comma / semicolon ---
+  const skillMap = {};
+  rows.forEach(r => {
+    (r.skills_seeking || "")
+      .split(/[\n,;]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 2 && s.length < 80)
+      .forEach(skill => { skillMap[skill] = (skillMap[skill] || 0) + 1; });
+  });
+  const topSkills = Object.entries(skillMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12);
+
+  // --- Mentorship demand ---
+  const mentorship = {
+    Yes:   rows.filter(r => (r.wants_mentorship || "").trim() === "Yes").length,
+    No:    rows.filter(r => (r.wants_mentorship || "").trim() === "No").length,
+    Maybe: rows.filter(r => (r.wants_mentorship || "").trim() === "Maybe").length,
+  };
+
+  // --- Alumni vs non ---
+  const alumni = {
+    Alumni:       rows.filter(r => isYes(r.is_alumni)).length,
+    "Non-Alumni": rows.filter(r => !isYes(r.is_alumni)).length,
+  };
+
+  // --- Outcome stories — anyone with at least one "Yes" outcome ---
+  const stories = rows
+    .filter(r => isYes(r.got_job_or_opportunity) || isYes(r.launched_business) || isYes(r.became_teaching_artist))
+    .map(r => {
+      const chips = [];
+      if (isYes(r.got_job_or_opportunity)) chips.push("New job / gig");
+      if (isYes(r.launched_business))      chips.push("Launched business");
+      if (isYes(r.became_teaching_artist)) chips.push("Teaching Artist");
+      return {
+        name:     (r.name     || "A participant").trim(),
+        role:     (r.role     || "").trim(),
+        industry: (r.industry || "").trim(),
+        chips,
+        date: new Date(r.submitted_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+      };
+    })
+    .slice(0, 12);
+
+  return { totals, industryMap, roleMap, timeMap, topSkills, mentorship, alumni, stories };
+}
+
+// ── RENDER: HERO CARDS ────────────────────────────────────────────
 function renderHero(totals) {
   const stats = [
-    { icon: "👥", value: fmt(totals.participants),          label: "Participants",              accent: false },
-    { icon: "🎭", value: fmt(totals.artists_and_mentors),   label: "Teaching Artists & Mentors",accent: false },
-    { icon: "📅", value: fmt(totals.events || 0),           label: "Events Run",                accent: false },
-    { icon: "🤝", value: fmtDecimal(totals.volunteer_hours, 0), label: "Volunteer Hours",       accent: false },
-    { icon: "🚀", value: fmt(totals.career_placements),     label: "Career Placements",         accent: true  },
+    { icon: "👥", value: fmt(totals.respondents),     label: "Unique Respondents",        accent: false },
+    { icon: "🎭", value: fmt(totals.teachingArtists), label: "Teaching Artists",           accent: false },
+    { icon: "💼", value: fmt(totals.gotJob),          label: "New Jobs & Opportunities",   accent: false },
+    { icon: "🚀", value: fmt(totals.launchedBiz),     label: "Businesses Launched",        accent: true  },
+    { icon: "🔄", value: fmt(totals.returning),       label: "Returning Participants",     accent: false },
   ];
 
-  const grid = document.getElementById("hero-grid");
-  grid.innerHTML = stats.map(s => `
+  document.getElementById("hero-grid").innerHTML = stats.map(s => `
     <div class="stat-card ${s.accent ? "accent" : ""}">
       <div class="stat-icon">${s.icon}</div>
       <div class="stat-number">${s.value}</div>
@@ -609,141 +505,84 @@ function renderHero(totals) {
     </div>
   `).join("");
 
-  document.getElementById("header-respondents").textContent =
-    fmt(totals.total_respondents) + " total respondents";
+  document.getElementById("header-count").textContent =
+    fmt(totals.respondents) + " total respondents";
 }
 
-/* ── Donut: Participants by Industry / Discipline ───────────────────── */
-function renderDisciplineChart(data) {
+// ── RENDER: INDUSTRY DONUT ────────────────────────────────────────
+function renderIndustryChart(data) {
   const labels = Object.keys(data);
   const values = Object.values(data);
   const total  = values.reduce((a, b) => a + b, 0);
 
-  new Chart(document.getElementById("chartDiscipline"), {
+  new Chart(document.getElementById("chartIndustry"), {
     type: "doughnut",
     data: {
       labels,
-      datasets: [{
-        data:            values,
-        backgroundColor: DISCIPLINE_COLORS.slice(0, labels.length),
-        borderColor:     "#fff",
-        borderWidth:     3,
-        hoverOffset:     6,
-      }]
+      datasets: [{ data: values, backgroundColor: PALETTE.slice(0, labels.length), borderColor: "#fff", borderWidth: 3, hoverOffset: 6 }]
     },
     options: {
       cutout: "65%",
       plugins: {
-        legend: {
-          position: "bottom",
-          labels: { font: { family: "Inter", size: 11 }, padding: 10, boxWidth: 12 }
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.label}: ${ctx.parsed} (${Math.round(ctx.parsed/total*100)}%)`
-          }
-        }
+        legend: { position: "bottom", labels: { font: { family: "Inter", size: 11 }, padding: 10, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} (${Math.round(ctx.parsed / total * 100)}%)` } }
       },
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
     }
   });
 }
 
-/* ── Bar: Headcount per Event ───────────────────────────────────────── */
-function renderHeadcountChart(events) {
-  const labels = events.map(e => e.event.length > 22 ? e.event.slice(0, 22) + "…" : e.event);
-  const values = events.map(e => e.headcount);
+// ── RENDER: ROLE BAR ──────────────────────────────────────────────
+function renderRolesChart(data) {
+  const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  const labels = sorted.map(([k]) => k);
+  const values = sorted.map(([, v]) => v);
 
-  new Chart(document.getElementById("chartHeadcount"), {
+  new Chart(document.getElementById("chartRoles"), {
     type: "bar",
     data: {
       labels,
       datasets: [{
-        label:           "Attendees",
-        data:            values,
-        backgroundColor: values.map((_, i) => i % 2 === 0 ? PURPLE : PURPLE_LIGHT),
-        borderRadius:    4,
-        borderSkipped:   false,
+        label: "Respondents",
+        data: values,
+        backgroundColor: labels.map((_, i) => i % 2 === 0 ? PURPLE : PURPLE_LIGHT),
+        borderRadius: 4, borderSkipped: false,
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: (items) => events[items[0].dataIndex].event,
-            label: (ctx) => ` ${ctx.parsed.y} attendees`
-          }
-        }
-      },
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
       scales: {
-        x: {
-          ticks: { font: { family: "Inter", size: 10 }, maxRotation: 45 },
-          grid:  { display: false }
-        },
-        y: {
-          ticks: { font: { family: "Inter", size: 11 } },
-          grid:  { color: GRAY_200 },
-          beginAtZero: true,
-        }
+        x: { ticks: { font: { family: "Inter", size: 10 }, maxRotation: 30 }, grid: { display: false } },
+        y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { color: GRAY_200 }, beginAtZero: true }
       }
     }
   });
 }
 
-/* ── Line: New vs Returning ─────────────────────────────────────────── */
-function renderNewReturningChart(data) {
-  const months   = Object.keys(data).sort();
-  const newData  = months.map(m => data[m].new      || 0);
-  const retData  = months.map(m => data[m].returning || 0);
-
-  // Pretty-print month labels: "2026-04" → "Apr"
+// ── RENDER: TIMELINE LINE ─────────────────────────────────────────
+function renderTimelineChart(data) {
+  const months = Object.keys(data).sort();
+  const values = months.map(m => data[m]);
   const labels = months.map(m => {
     const [y, mo] = m.split("-");
-    return new Date(Number(y), Number(mo) - 1, 1)
-      .toLocaleString("en-US", { month: "short" });
+    return new Date(Number(y), Number(mo) - 1, 1).toLocaleString("en-US", { month: "short", year: "2-digit" });
   });
 
-  new Chart(document.getElementById("chartNewReturning"), {
+  new Chart(document.getElementById("chartTimeline"), {
     type: "line",
     data: {
       labels,
-      datasets: [
-        {
-          label:           "New",
-          data:            newData,
-          borderColor:     PURPLE,
-          backgroundColor: PURPLE + "22",
-          fill:            true,
-          tension:         0.4,
-          pointRadius:     4,
-          pointHoverRadius:6,
-        },
-        {
-          label:           "Returning",
-          data:            retData,
-          borderColor:     CORAL,
-          backgroundColor: CORAL + "22",
-          fill:            true,
-          tension:         0.4,
-          pointRadius:     4,
-          pointHoverRadius:6,
-        }
-      ]
+      datasets: [{
+        label: "Responses",
+        data: values,
+        borderColor: CORAL, backgroundColor: CORAL + "22",
+        fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6,
+      }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: "index", intersect: false },
-      plugins: {
-        legend: {
-          position: "bottom",
-          labels: { font: { family: "Inter", size: 11 }, padding: 12, boxWidth: 12 }
-        }
-      },
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
       scales: {
         x: { ticks: { font: { family: "Inter", size: 11 } }, grid: { display: false } },
         y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { color: GRAY_200 }, beginAtZero: true }
@@ -752,89 +591,63 @@ function renderNewReturningChart(data) {
   });
 }
 
-/* ── Ranked table: Participants by Zip ──────────────────────────────── */
-function renderZipTable(data) {
-  const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
-  const max     = entries[0]?.[1] || 1;
-  const tbody   = document.getElementById("zipTableBody");
+// ── RENDER: SKILLS TABLE ──────────────────────────────────────────
+function renderSkillsTable(skills) {
+  const max  = skills[0]?.[1] || 1;
+  const tbody = document.getElementById("skillsTableBody");
 
-  tbody.innerHTML = entries.map(([zip, count], i) => `
+  if (!skills.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No skills data yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = skills.map(([skill, count], i) => `
     <tr>
       <td class="rank">${i + 1}</td>
-      <td>${zip}</td>
-      <td class="zip-bar-cell">
-        <div class="zip-bar-track">
-          <div class="zip-bar-fill" style="width:${Math.round(count/max*100)}%"></div>
+      <td>${skill}</td>
+      <td class="bar-cell">
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${Math.round(count / max * 100)}%"></div>
         </div>
       </td>
-      <td class="zip-count">${count}</td>
+      <td class="count-cell">${count}</td>
     </tr>
   `).join("");
 }
 
-/* ── Horizontal bar: Top Skills Being Sought ─────────────────────────── */
-function renderSkillsChart(data) {
-  // Show top 8 skills maximum so bars aren't too cramped
-  const entries = Object.entries(data).slice(0, 8);
-  const labels  = entries.map(([k]) => k);
-  const values  = entries.map(([, v]) => v);
-
-  new Chart(document.getElementById("chartSkills"), {
-    type: "bar",
+// ── RENDER: MENTORSHIP DONUT ──────────────────────────────────────
+function renderMentorshipChart(data) {
+  new Chart(document.getElementById("chartMentorship"), {
+    type: "doughnut",
     data: {
-      labels,
-      datasets: [{
-        label:           "Respondents",
-        data:            values,
-        backgroundColor: labels.map((_, i) => DISCIPLINE_COLORS[i % DISCIPLINE_COLORS.length]),
-        borderRadius:    4,
-        borderSkipped:   false,
-      }]
+      labels: Object.keys(data),
+      datasets: [{ data: Object.values(data), backgroundColor: [PURPLE, GRAY_200, CORAL_LIGHT], borderColor: "#fff", borderWidth: 3 }]
     },
     options: {
-      indexAxis: "y",
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: {
-          ticks: { font: { family: "Inter", size: 11 }, stepSize: 1 },
-          grid:  { color: GRAY_200 },
-          beginAtZero: true,
-        },
-        y: {
-          ticks: { font: { family: "Inter", size: 11 } },
-          grid:  { display: false },
-        }
-      }
+      cutout: "60%",
+      plugins: {
+        legend: { position: "bottom", labels: { font: { family: "Inter", size: 11 }, padding: 12, boxWidth: 12 } }
+      },
+      responsive: true, maintainAspectRatio: false,
     }
   });
 }
 
-/* ── Bar: Volunteer Hours by Quarter ────────────────────────────────── */
-function renderVolHoursChart(data) {
-  const labels = Object.keys(data);
-  const values = Object.values(data);
-
-  new Chart(document.getElementById("chartVolHours"), {
+// ── RENDER: ALUMNI BAR ────────────────────────────────────────────
+function renderAlumniChart(data) {
+  new Chart(document.getElementById("chartAlumni"), {
     type: "bar",
     data: {
-      labels,
+      labels: Object.keys(data),
       datasets: [{
-        label:           "Hours",
-        data:            values,
-        backgroundColor: CORAL_LIGHT,
-        borderRadius:    4,
-        borderSkipped:   false,
+        data: Object.values(data),
+        backgroundColor: [PURPLE_LIGHT, CORAL_LIGHT],
+        borderRadius: 4, borderSkipped: false,
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} hrs` } }
-      },
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
       scales: {
         x: { ticks: { font: { family: "Inter", size: 11 } }, grid: { display: false } },
         y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { color: GRAY_200 }, beginAtZero: true }
@@ -843,13 +656,13 @@ function renderVolHoursChart(data) {
   });
 }
 
-/* ── Stories feed ────────────────────────────────────────────────────── */
+// ── RENDER: STORIES ───────────────────────────────────────────────
 function renderStories(stories) {
   const grid = document.getElementById("storiesGrid");
 
-  if (!stories || stories.length === 0) {
+  if (!stories.length) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-      No notable outcomes recorded yet.
+      No outcomes recorded yet — they will appear here as responses come in.
     </div>`;
     return;
   }
@@ -857,69 +670,82 @@ function renderStories(stories) {
   grid.innerHTML = stories.map(s => `
     <div class="story-card">
       <div class="story-meta">
-        <span class="story-event">${s.event || "Event"}</span>
-        ${s.date ? `<span class="story-date">${s.date}</span>` : ""}
+        <span class="story-name">${s.name}</span>
+        ${s.date ? `<span class="story-role">${s.date}</span>` : ""}
       </div>
-      <div class="story-quote-mark">"</div>
-      <p class="story-text">${s.story}</p>
+      ${s.industry ? `<div class="story-industry">${s.industry}</div>` : ""}
+      <div class="story-quote">"</div>
+      <div class="story-outcomes">
+        ${s.chips.map(c => `<span class="outcome-chip">${c}</span>`).join("")}
+      </div>
+      ${s.role ? `<div class="story-role" style="margin-top:4px;">${s.role}</div>` : ""}
     </div>
   `).join("");
 }
 
-/* ── Footer timestamp ────────────────────────────────────────────────── */
-function renderFooter(generatedAt) {
-  const d = new Date(generatedAt);
-  const formatted = isNaN(d)
-    ? generatedAt
-    : d.toLocaleString("en-US", {
-        month: "long", day: "numeric", year: "numeric",
-        hour: "numeric", minute: "2-digit", timeZoneName: "short"
-      });
-  document.getElementById("footer-updated").textContent =
-    "Last updated: " + formatted;
+// ── RENDER: FOOTER ────────────────────────────────────────────────
+function renderFooter() {
+  const now = new Date().toLocaleString("en-US", {
+    month: "long", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit", timeZoneName: "short"
+  });
+  document.getElementById("footer-updated").textContent = "Last fetched: " + now;
 }
 
-/* ── Main: load data and render all components ───────────────────────── */
+// ── MAIN — fetch from Supabase and render everything ──────────────
 async function main() {
-  let data;
-
-  // Prefer the inline script bundle (works with file:// and HTTP alike).
-  // Fall back to fetch() when served over HTTP and data.js isn't present.
-  if (window.DASHBOARD_DATA) {
-    data = window.DASHBOARD_DATA;
-  } else {
-    try {
-      const res = await fetch("./data.json");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      data = await res.json();
-    } catch (err) {
-      document.body.innerHTML = `
-        <div style="padding:60px;text-align:center;font-family:Inter,sans-serif;">
-          <h2 style="color:#6B3FA0">Could not load dashboard data</h2>
-          <p style="color:#4B5563;margin-top:16px;line-height:1.7;">
-            <strong>If you just double-clicked index.html:</strong><br/>
-            Run the agent first — it writes <code>data.js</code> next to this file.<br/><br/>
-            <strong>If you're on a server and seeing this:</strong><br/>
-            Make sure <code>dashboard/data.json</code> exists.<br/><br/>
-            Error: ${err.message}
-          </p>
-        </div>`;
-      return;
-    }
+  // Guard: if the URL hasn't been replaced, show a helpful setup message
+  if (SUPABASE_URL.includes("YOUR_PROJECT_ID")) {
+    document.getElementById("hero-grid").innerHTML = `
+      <div style="grid-column:1/-1;padding:40px;text-align:center;color:#4B5563;font-family:Inter,sans-serif;">
+        <h2 style="color:#6B3FA0;margin-bottom:12px;">Almost there!</h2>
+        <p>Open <code>dashboard/index.html</code> and replace<br/>
+        <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> with your real values.<br/>
+        Find them at supabase.com → your project → Project Settings → API.</p>
+      </div>`;
+    document.getElementById("storiesGrid").innerHTML = "";
+    return;
   }
 
-  const { metrics, generated_at } = data;
-  const { totals, breakdowns, trends, stories } = metrics;
+  // Fetch every row from the responses table, oldest first
+  const { data: rows, error } = await db
+    .from("responses")
+    .select("*")
+    .order("submitted_at", { ascending: true });
 
-  renderHero(totals);
-  renderDisciplineChart(breakdowns.by_industry);
-  renderHeadcountChart(trends.headcount_per_event);
-  renderNewReturningChart(trends.new_vs_returning_by_month);
-  renderZipTable(breakdowns.by_zip);
-  renderSkillsChart(breakdowns.skills_sought);
-  renderVolHoursChart(trends.volunteer_hours_by_quarter);
-  renderStories(stories);
-  renderFooter(generated_at);
+  if (error) {
+    document.getElementById("hero-grid").innerHTML = `
+      <div style="grid-column:1/-1;padding:40px;text-align:center;color:#4B5563;">
+        <strong style="color:#EF4444;">Could not load data:</strong> ${error.message}<br/>
+        Check that your SUPABASE_URL and SUPABASE_ANON_KEY are correct and that
+        the <code>responses</code> table exists with public read enabled.
+      </div>`;
+    return;
+  }
+
+  // Handle empty state (no submissions yet)
+  if (!rows || rows.length === 0) {
+    document.getElementById("hero-grid").innerHTML = `
+      <div style="grid-column:1/-1;padding:40px;text-align:center;color:#9CA3AF;">
+        No responses yet — submit the Microsoft Form to see data appear here.
+      </div>`;
+    document.getElementById("storiesGrid").innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">No outcomes yet.</div>`;
+    return;
+  }
+
+  // Compute and render
+  const m = computeMetrics(rows);
+
+  renderHero(m.totals);
+  renderIndustryChart(m.industryMap);
+  renderRolesChart(m.roleMap);
+  renderTimelineChart(m.timeMap);
+  renderSkillsTable(m.topSkills);
+  renderMentorshipChart(m.mentorship);
+  renderAlumniChart(m.alumni);
+  renderStories(m.stories);
+  renderFooter();
 }
 
 main();
