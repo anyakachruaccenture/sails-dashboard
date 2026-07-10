@@ -13,8 +13,8 @@
 -- 1. DROP EXISTING TABLE AND POLICIES
 -- ------------------------------------------------------------
 
-DROP TABLE IF EXISTS responses;
 DROP VIEW  IF EXISTS dashboard_metrics;
+DROP TABLE IF EXISTS responses;
 
 
 -- ------------------------------------------------------------
