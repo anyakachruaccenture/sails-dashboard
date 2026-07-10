@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Chart.js for all charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -20,31 +20,31 @@
   <style>
     /* ── DESIGN TOKENS ──────────────────────────────────────── */
     :root {
-      --purple:       #6B3FA0;
-      --purple-light: #9B6FD0;
-      --purple-dark:  #4A2875;
-      --coral:        #F4704B;
-      --coral-light:  #F8957A;
-      --cream:        #FDF8F3;
-      --gray-50:      #F9FAFB;
-      --gray-100:     #F3F4F6;
-      --gray-200:     #E5E7EB;
-      --gray-400:     #9CA3AF;
-      --gray-600:     #4B5563;
-      --gray-800:     #1F2937;
+      --pink:         #F5125A;
+      --pink-light:   #FF4D7F;
+      --pink-dark:    #B80D43;
+      --peach:        #F2BA98;
+      --peach-light:  #F8D8C0;
+      --dark:         #0C0909;
+      --surface:      #181212;
+      --surface-2:    #221A1A;
+      --border:       #2C1C1C;
+      --text:         #F0E8E0;
+      --text-muted:   #8A7070;
       --white:        #FFFFFF;
+      --font-display: 'Bebas Neue', sans-serif;
       --font:         'Inter', sans-serif;
       --radius:       12px;
-      --shadow:       0 2px 12px rgba(0,0,0,0.08);
-      --shadow-md:    0 4px 24px rgba(0,0,0,0.12);
+      --shadow:       0 2px 16px rgba(0,0,0,0.5);
+      --shadow-md:    0 4px 32px rgba(0,0,0,0.6);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: var(--font);
-      background: var(--cream);
-      color: var(--gray-800);
+      background: var(--dark);
+      color: var(--text);
       line-height: 1.6;
     }
 
@@ -52,58 +52,61 @@
     .container    { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
     .section      { padding: 48px 0; }
     .section + .section { padding-top: 0; }
-    .divider      { border: none; border-top: 2px solid var(--gray-200); }
+    .divider      { border: none; border-top: 1px solid var(--border); }
 
     .section-title {
-      font-size: 1.1rem; font-weight: 700;
-      color: var(--purple-dark);
-      text-transform: uppercase; letter-spacing: 0.08em;
+      font-family: var(--font-display);
+      font-size: 1.6rem; font-weight: 400;
+      color: var(--peach);
+      text-transform: uppercase; letter-spacing: 0.06em;
       margin-bottom: 20px;
     }
 
     .card {
-      background: var(--white);
+      background: var(--surface);
       border-radius: var(--radius);
+      border: 1px solid var(--border);
       box-shadow: var(--shadow);
       padding: 24px;
     }
 
     /* ── HEADER ─────────────────────────────────────────────── */
     header {
-      background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-light) 100%);
-      color: var(--white);
+      background: var(--surface);
+      border-bottom: 2px solid var(--pink);
     }
     .header-inner {
       display: flex; align-items: center;
       justify-content: space-between;
-      padding: 28px 24px; gap: 24px; flex-wrap: wrap;
+      padding: 24px; gap: 24px; flex-wrap: wrap;
     }
     .header-brand { display: flex; align-items: center; gap: 16px; }
     .header-logo  {
-      width: 52px; height: 52px; background: var(--coral);
+      width: 52px; height: 52px; background: var(--pink);
       border-radius: 10px; display: flex; align-items: center;
       justify-content: center; font-size: 1.6rem; flex-shrink: 0;
     }
-    .header-org      { font-size: 0.8rem; font-weight: 600; opacity: 0.75; letter-spacing: 0.1em; text-transform: uppercase; }
-    .header-title    { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
-    .header-subtitle { font-size: 0.9rem; opacity: 0.8; margin-top: 2px; }
+    .header-org      { font-size: 0.78rem; font-weight: 700; color: var(--peach); letter-spacing: 0.14em; text-transform: uppercase; }
+    .header-title    { font-family: var(--font-display); font-size: 2.2rem; font-weight: 400; color: var(--white); line-height: 1; letter-spacing: 0.03em; }
+    .header-subtitle { font-size: 0.88rem; color: var(--text-muted); margin-top: 3px; }
     .header-badge    {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
       border-radius: 8px; padding: 10px 18px;
       font-size: 0.82rem; text-align: right; line-height: 1.5; flex-shrink: 0;
+      color: var(--text-muted);
     }
-    .header-badge strong { display: block; font-size: 1rem; }
+    .header-badge strong { display: block; font-size: 1rem; color: var(--white); }
 
     /* live indicator dot */
     .live-dot {
       display: inline-block; width: 8px; height: 8px;
-      background: #4ADE80; border-radius: 50%;
+      background: var(--pink); border-radius: 50%;
       margin-right: 6px; animation: pulse 2s infinite;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
+      50%       { opacity: 0.3; }
     }
 
     /* ── HERO STAT CARDS ────────────────────────────────────── */
@@ -113,21 +116,22 @@
       gap: 16px;
     }
     .stat-card {
-      background: var(--white); border-radius: var(--radius);
+      background: var(--surface); border-radius: var(--radius);
+      border: 1px solid var(--border);
       box-shadow: var(--shadow); padding: 24px 20px; text-align: center;
       position: relative; overflow: hidden;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .stat-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-      background: linear-gradient(90deg, var(--purple), var(--coral));
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--pink);
     }
-    .stat-card.accent::before { background: var(--coral); }
+    .stat-card.accent::before { background: var(--peach); }
     .stat-icon   { font-size: 1.8rem; margin-bottom: 10px; }
-    .stat-number { font-size: 2.4rem; font-weight: 800; color: var(--purple-dark); line-height: 1; margin-bottom: 6px; }
-    .stat-card.accent .stat-number { color: var(--coral); }
-    .stat-label  { font-size: 0.78rem; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-number { font-family: var(--font-display); font-size: 3.2rem; font-weight: 400; letter-spacing: 0.02em; color: var(--pink); line-height: 1; margin-bottom: 6px; }
+    .stat-card.accent .stat-number { color: var(--peach); }
+    .stat-label  { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
 
     /* ── CHARTS ROW ─────────────────────────────────────────── */
     .charts-grid {
@@ -135,7 +139,7 @@
       grid-template-columns: 1fr 2fr 1.5fr;
       gap: 20px; align-items: start;
     }
-    .chart-card h3 { font-size: 0.9rem; font-weight: 700; color: var(--gray-800); margin-bottom: 16px; }
+    .chart-card h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 400; color: var(--peach); margin-bottom: 16px; letter-spacing: 0.06em; text-transform: uppercase; }
     .chart-wrapper { position: relative; width: 100%; }
 
     /* ── SKILLS & MENTORSHIP ────────────────────────────────── */
@@ -143,74 +147,75 @@
 
     /* ranked table */
     .ranked-table { width: 100%; border-collapse: collapse; }
-    .ranked-table th, .ranked-table td { padding: 10px 14px; text-align: left; font-size: 0.88rem; }
+    .ranked-table th, .ranked-table td { padding: 10px 14px; text-align: left; font-size: 0.88rem; color: var(--text); }
     .ranked-table th {
-      font-weight: 700; color: var(--gray-600);
-      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;
-      border-bottom: 2px solid var(--gray-200);
+      font-weight: 700; color: var(--text-muted);
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
     }
-    .ranked-table tbody tr { border-bottom: 1px solid var(--gray-100); }
+    .ranked-table tbody tr { border-bottom: 1px solid var(--border); }
     .ranked-table tbody tr:last-child { border-bottom: none; }
-    .ranked-table tbody tr:hover { background: var(--gray-50); }
-    .rank { color: var(--gray-400); font-weight: 600; width: 2rem; }
+    .ranked-table tbody tr:hover { background: var(--surface-2); }
+    .rank { color: var(--text-muted); font-weight: 600; width: 2rem; }
     .bar-cell  { width: 40%; padding-right: 10px; }
-    .bar-track { background: var(--gray-100); border-radius: 4px; height: 8px; overflow: hidden; }
-    .bar-fill  { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--purple), var(--purple-light)); }
-    .count-cell { font-weight: 700; color: var(--purple-dark); text-align: right; }
+    .bar-track { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 4px; background: var(--pink); }
+    .count-cell { font-weight: 700; color: var(--pink); text-align: right; }
 
     /* ── STORIES FEED ───────────────────────────────────────── */
     .stories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .story-card {
-      background: var(--white); border-radius: var(--radius);
+      background: var(--surface); border-radius: var(--radius);
+      border: 1px solid var(--border);
       box-shadow: var(--shadow); padding: 22px;
       display: flex; flex-direction: column; gap: 12px;
-      border-left: 4px solid var(--coral);
+      border-left: 3px solid var(--pink);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .story-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .story-meta  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .story-name  { font-size: 0.78rem; font-weight: 700; color: var(--white); background: var(--purple); border-radius: 100px; padding: 3px 10px; }
-    .story-role  { font-size: 0.78rem; color: var(--gray-400); }
+    .story-name  { font-size: 0.78rem; font-weight: 700; color: var(--dark); background: var(--pink); border-radius: 100px; padding: 3px 10px; }
+    .story-role  { font-size: 0.78rem; color: var(--text-muted); }
     .story-outcomes { display: flex; flex-wrap: wrap; gap: 6px; }
     .outcome-chip {
       font-size: 0.72rem; font-weight: 600; padding: 2px 8px;
-      border-radius: 100px; background: var(--coral-light);
-      color: var(--white);
+      border-radius: 100px; background: var(--surface-2);
+      color: var(--peach); border: 1px solid var(--border);
     }
-    .story-industry { font-size: 0.82rem; color: var(--gray-600); font-style: italic; }
-    .story-quote { font-size: 2rem; color: var(--coral-light); line-height: 0.6; font-family: Georgia, serif; opacity: 0.5; }
+    .story-industry { font-size: 0.82rem; color: var(--peach); font-style: italic; }
+    .story-quote { font-size: 2rem; color: var(--pink); line-height: 0.6; font-family: Georgia, serif; opacity: 0.3; }
 
     /* ── LOADING STATE ──────────────────────────────────────── */
     .loading {
       display: flex; align-items: center; justify-content: center;
       padding: 80px 0; flex-direction: column; gap: 16px;
-      color: var(--gray-400); font-size: 0.9rem;
+      color: var(--text-muted); font-size: 0.9rem;
     }
     .spinner {
       width: 36px; height: 36px;
-      border: 3px solid var(--gray-200);
-      border-top-color: var(--purple);
+      border: 3px solid var(--border);
+      border-top-color: var(--pink);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .empty-state { padding: 32px; text-align: center; color: var(--gray-400); font-size: 0.9rem; }
+    .empty-state { padding: 32px; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
 
-    /* ── SURVEY BUTTON (header) ─────────────────────────────── */
+    /* ── SURVEY BUTTON ──────────────────────────────────────── */
     .survey-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      background: var(--coral); color: var(--white);
+      background: var(--pink); color: var(--white);
       text-decoration: none; border-radius: 8px;
       padding: 10px 18px; font-size: 0.85rem; font-weight: 700;
       transition: background 0.15s; white-space: nowrap; flex-shrink: 0;
     }
-    .survey-btn:hover { background: #E05A3A; }
+    .survey-btn:hover { background: var(--pink-light); }
 
     /* ── FOOTER ─────────────────────────────────────────────── */
-    footer { background: var(--purple-dark); color: rgba(255,255,255,0.7); padding: 24px 0; margin-top: 16px; }
+    footer { background: var(--dark); color: var(--text-muted); padding: 24px 0; margin-top: 16px; border-top: 1px solid var(--border); }
     .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 0.82rem; }
-    footer strong { color: var(--white); }
+    footer strong { color: var(--pink); }
 
     /* ── RESPONSIVE ─────────────────────────────────────────── */
     @media (max-width: 1100px) {
@@ -391,15 +396,16 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── COLOUR PALETTE ────────────────────────────────────────────────
-const PURPLE       = "#6B3FA0";
-const PURPLE_LIGHT = "#9B6FD0";
-const CORAL        = "#F4704B";
-const CORAL_LIGHT  = "#F8957A";
-const GRAY_200     = "#E5E7EB";
+const PINK       = "#F5125A";
+const PINK_LIGHT = "#FF4D7F";
+const PEACH      = "#F2BA98";
+const PEACH_LIGHT= "#F8D8C0";
+const GRID_COLOR = "rgba(255,255,255,0.06)";
+const TICK_COLOR = "#8A7070";
 
 const PALETTE = [
-  PURPLE, CORAL, "#3B82F6", "#10B981", "#F59E0B",
-  "#EF4444", "#8B5CF6", "#06B6D4", "#84CC16", "#F97316"
+  PINK, PEACH, "#7C3AED", "#0EA5E9", "#F59E0B",
+  "#10B981", "#EF4444", "#8B5CF6", "#06B6D4", "#F97316"
 ];
 
 // ── NUMBER FORMATTING ─────────────────────────────────────────────
@@ -532,12 +538,12 @@ function renderIndustryChart(data) {
     type: "doughnut",
     data: {
       labels,
-      datasets: [{ data: values, backgroundColor: PALETTE.slice(0, labels.length), borderColor: "#fff", borderWidth: 3, hoverOffset: 6 }]
+      datasets: [{ data: values, backgroundColor: PALETTE.slice(0, labels.length), borderColor: "#181212", borderWidth: 3, hoverOffset: 6 }]
     },
     options: {
       cutout: "65%",
       plugins: {
-        legend: { position: "bottom", labels: { font: { family: "Inter", size: 11 }, padding: 10, boxWidth: 12 } },
+        legend: { position: "bottom", labels: { font: { family: "Inter", size: 11 }, padding: 10, boxWidth: 12, color: TICK_COLOR } },
         tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} (${Math.round(ctx.parsed / total * 100)}%)` } }
       },
       responsive: true, maintainAspectRatio: false,
@@ -558,7 +564,7 @@ function renderRolesChart(data) {
       datasets: [{
         label: "Respondents",
         data: values,
-        backgroundColor: labels.map((_, i) => i % 2 === 0 ? PURPLE : PURPLE_LIGHT),
+        backgroundColor: labels.map((_, i) => i % 2 === 0 ? PINK : PINK_LIGHT),
         borderRadius: 4, borderSkipped: false,
       }]
     },
@@ -566,8 +572,8 @@ function renderRolesChart(data) {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { font: { family: "Inter", size: 10 }, maxRotation: 30 }, grid: { display: false } },
-        y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { color: GRAY_200 }, beginAtZero: true }
+        x: { ticks: { font: { family: "Inter", size: 10 }, maxRotation: 30, color: TICK_COLOR }, grid: { display: false } },
+        y: { ticks: { font: { family: "Inter", size: 11 }, color: TICK_COLOR }, grid: { color: GRID_COLOR }, beginAtZero: true }
       }
     }
   });
@@ -589,7 +595,7 @@ function renderTimelineChart(data) {
       datasets: [{
         label: "Responses",
         data: values,
-        borderColor: CORAL, backgroundColor: CORAL + "22",
+        borderColor: PEACH, backgroundColor: PEACH + "44",
         fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6,
       }]
     },
@@ -597,8 +603,8 @@ function renderTimelineChart(data) {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { font: { family: "Inter", size: 11 } }, grid: { display: false } },
-        y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { color: GRAY_200 }, beginAtZero: true }
+        x: { ticks: { font: { family: "Inter", size: 11 }, color: TICK_COLOR }, grid: { display: false } },
+        y: { ticks: { font: { family: "Inter", size: 11 }, color: TICK_COLOR }, grid: { color: GRID_COLOR }, beginAtZero: true }
       }
     }
   });
@@ -634,12 +640,12 @@ function renderMentorshipChart(data) {
     type: "doughnut",
     data: {
       labels: Object.keys(data),
-      datasets: [{ data: Object.values(data), backgroundColor: [PURPLE, GRAY_200, CORAL_LIGHT], borderColor: "#fff", borderWidth: 3 }]
+      datasets: [{ data: Object.values(data), backgroundColor: [PINK, "#2C1C1C", PEACH], borderColor: "#181212", borderWidth: 3 }]
     },
     options: {
       cutout: "60%",
       plugins: {
-        legend: { position: "bottom", labels: { font: { family: "Inter", size: 11 }, padding: 12, boxWidth: 12 } }
+        legend: { position: "bottom", labels: { font: { family: "Inter", size: 11 }, padding: 12, boxWidth: 12, color: TICK_COLOR } }
       },
       responsive: true, maintainAspectRatio: false,
     }
@@ -654,7 +660,7 @@ function renderAlumniChart(data) {
       labels: Object.keys(data),
       datasets: [{
         data: Object.values(data),
-        backgroundColor: [PURPLE_LIGHT, CORAL_LIGHT],
+        backgroundColor: [PINK, PEACH],
         borderRadius: 4, borderSkipped: false,
       }]
     },
@@ -662,8 +668,8 @@ function renderAlumniChart(data) {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { font: { family: "Inter", size: 11 } }, grid: { display: false } },
-        y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { color: GRAY_200 }, beginAtZero: true }
+        x: { ticks: { font: { family: "Inter", size: 11 }, color: TICK_COLOR }, grid: { display: false } },
+        y: { ticks: { font: { family: "Inter", size: 11 }, color: TICK_COLOR }, grid: { color: GRID_COLOR }, beginAtZero: true }
       }
     }
   });
