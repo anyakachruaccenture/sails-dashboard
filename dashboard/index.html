@@ -197,6 +197,16 @@
 
     .empty-state { padding: 32px; text-align: center; color: var(--gray-400); font-size: 0.9rem; }
 
+    /* ── SURVEY BUTTON (header) ─────────────────────────────── */
+    .survey-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--coral); color: var(--white);
+      text-decoration: none; border-radius: 8px;
+      padding: 10px 18px; font-size: 0.85rem; font-weight: 700;
+      transition: background 0.15s; white-space: nowrap; flex-shrink: 0;
+    }
+    .survey-btn:hover { background: #E05A3A; }
+
     /* ── FOOTER ─────────────────────────────────────────────── */
     footer { background: var(--purple-dark); color: rgba(255,255,255,0.7); padding: 24px 0; margin-top: 16px; }
     .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 0.82rem; }
@@ -233,9 +243,12 @@
           <div class="header-subtitle">Program Outcomes &amp; Community Reach</div>
         </div>
       </div>
-      <div class="header-badge">
-        <strong id="header-count">Loading…</strong>
-        <span><span class="live-dot"></span>Live from Supabase</span>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <a href="/survey" class="survey-btn">Take the Survey →</a>
+        <div class="header-badge">
+          <strong id="header-count">Loading…</strong>
+          <span><span class="live-dot"></span>Live from Supabase</span>
+        </div>
       </div>
     </div>
   </div>
@@ -411,7 +424,7 @@ function computeMetrics(rows) {
   // --- Hero totals ---
   const totals = {
     respondents:      unique.length,
-    teachingArtists:  unique.filter(r => (r.role || "").includes("Teaching Artist")).length,
+    teachingArtists:  unique.filter(r => Array.isArray(r.role) ? r.role.includes("Teaching Artist") : (r.role || "").includes("Teaching Artist")).length,
     gotJob:           rows.filter(r => isYes(r.got_job_or_opportunity)).length,
     launchedBiz:      rows.filter(r => isYes(r.launched_business)).length,
     returning:        rows.filter(r => isYes(r.has_returned)).length,
@@ -427,7 +440,7 @@ function computeMetrics(rows) {
   // --- By role (bar chart) — split comma-separated multi-select ---
   const roleMap = {};
   rows.forEach(r => {
-    (r.role || "").split(",").map(s => s.trim()).filter(Boolean).forEach(role => {
+    (Array.isArray(r.role) ? r.role : (r.role || "").split(",").map(s => s.trim())).filter(Boolean).forEach(role => {
       roleMap[role] = (roleMap[role] || 0) + 1;
     });
   });
@@ -476,7 +489,7 @@ function computeMetrics(rows) {
       if (isYes(r.became_teaching_artist)) chips.push("Teaching Artist");
       return {
         name:     (r.name     || "A participant").trim(),
-        role:     (r.role     || "").trim(),
+        role:     Array.isArray(r.role) ? r.role.join(", ") : (r.role || "").trim(),
         industry: (r.industry || "").trim(),
         chips,
         date: new Date(r.submitted_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }),
@@ -727,7 +740,7 @@ async function main() {
   if (!rows || rows.length === 0) {
     document.getElementById("hero-grid").innerHTML = `
       <div style="grid-column:1/-1;padding:40px;text-align:center;color:#9CA3AF;">
-        No responses yet — submit the Microsoft Form to see data appear here.
+        No responses yet — <a href="/survey" style="color:#6B3FA0;font-weight:600;">take the survey</a> to see data appear here.
       </div>`;
     document.getElementById("storiesGrid").innerHTML = `
       <div class="empty-state" style="grid-column:1/-1;">No outcomes yet.</div>`;

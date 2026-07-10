@@ -1,3 +1,6 @@
 {
-  "outputDirectory": "dashboard"
+  "rewrites": [
+    { "source": "/survey", "destination": "/survey/index.html" },
+    { "source": "/",       "destination": "/dashboard/index.html" }
+  ]
 }

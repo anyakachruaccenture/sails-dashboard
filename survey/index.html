@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seattle Creates — Impact Survey</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────────── */
+    :root {
+      --purple:       #6B3FA0;
+      --purple-dark:  #4A2875;
+      --purple-bg:    #EDE9F6;
+      --coral:        #F4704B;
+      --coral-hover:  #E05A3A;
+      --gray-50:      #F9FAFB;
+      --gray-100:     #F3F4F6;
+      --gray-200:     #E5E7EB;
+      --gray-400:     #9CA3AF;
+      --gray-600:     #4B5563;
+      --gray-800:     #1F2937;
+      --white:        #FFFFFF;
+      --error:        #EF4444;
+      --font:         'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      min-height: 100vh;
+      background: linear-gradient(150deg, #EDE9F6 0%, #FFF5F2 55%, #F0EBF8 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 64px;
+    }
+
+    /* ── BACK LINK ──────────────────────────────────────────── */
+    .back-link {
+      align-self: flex-start;
+      color: var(--purple);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 20px;
+      opacity: 0.75;
+      transition: opacity 0.15s;
+    }
+    .back-link:hover { opacity: 1; }
+
+    /* ── CARD ───────────────────────────────────────────────── */
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow:
+        0 8px 40px rgba(107, 63, 160, 0.13),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+
+    /* ── CARD HEADER ────────────────────────────────────────── */
+    .card-header {
+      background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 100%);
+      color: var(--white);
+      padding: 24px 28px 20px;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .brand-logo {
+      width: 44px; height: 44px;
+      background: var(--coral);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .brand-name  { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.75; }
+    .brand-title { font-size: 1.05rem; font-weight: 800; line-height: 1.2; margin-top: 2px; }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .progress-track {
+      flex: 1;
+      height: 5px;
+      background: rgba(255,255,255,0.22);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--coral);
+      border-radius: 3px;
+      transition: width 0.45s cubic-bezier(.4,0,.2,1);
+    }
+    .progress-label {
+      font-size: 0.77rem;
+      font-weight: 600;
+      opacity: 0.75;
+      white-space: nowrap;
+    }
+
+    /* ── CARD BODY ──────────────────────────────────────────── */
+    .card-body {
+      padding: 32px 28px 8px;
+      min-height: 380px;
+      overflow: hidden;
+    }
+
+    /* ── STEPS ──────────────────────────────────────────────── */
+    .step { display: none; }
+
+    .step.active      { display: block; animation: slideIn     0.28s ease; }
+    .step.back-enter  { display: block; animation: slideInBack 0.28s ease; }
+
+    @keyframes slideIn     { from { opacity:0; transform:translateX(22px);  } to { opacity:1; transform:none; } }
+    @keyframes slideInBack { from { opacity:0; transform:translateX(-22px); } to { opacity:1; transform:none; } }
+
+    .step-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+    .step-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--gray-800);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .step-sub {
+      font-size: 0.88rem;
+      color: var(--gray-400);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    /* ── FIELD ──────────────────────────────────────────────── */
+    .field { margin-bottom: 22px; }
+
+    .field-label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .field-label.req::after { content: ' *'; color: var(--coral); }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 13px 15px;
+      border: 2px solid var(--gray-200);
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 0.97rem;
+      color: var(--gray-800);
+      background: var(--gray-50);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--purple);
+      background: var(--white);
+    }
+    input[type="text"].err,
+    textarea.err { border-color: var(--error); }
+    textarea { resize: vertical; min-height: 96px; }
+
+    /* ── CHIP GROUP (checkbox pills) ────────────────────────── */
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip input[type="checkbox"] { display: none; }
+    .chip-label {
+      display: block;
+      padding: 8px 17px;
+      border: 2px solid var(--gray-200);
+      border-radius: 100px;
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: var(--gray-600);
+      background: var(--gray-50);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.14s;
+    }
+    .chip:hover .chip-label {
+      border-color: var(--purple);
+      color: var(--purple);
+      background: var(--purple-bg);
+    }
+    .chip input:checked + .chip-label {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    /* ── BUTTON GROUP (radio yes/no) ────────────────────────── */
+    .btn-group {
+      display: flex;
+      border: 2px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .btn-opt { flex: 1; cursor: pointer; }
+    .btn-opt input[type="radio"] { display: none; }
+    .btn-opt-label {
+      display: block;
+      padding: 12px 8px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--gray-600);
+      border-right: 2px solid var(--gray-200);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.14s;
+    }
+    .btn-opt:last-child .btn-opt-label { border-right: none; }
+    .btn-opt:hover .btn-opt-label {
+      background: var(--purple-bg);
+      color: var(--purple);
+    }
+    .btn-opt input:checked + .btn-opt-label {
+      background: var(--purple);
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    /* ── ERRORS ─────────────────────────────────────────────── */
+    .field-error {
+      display: none;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--error);
+      font-weight: 600;
+    }
+    .field-error.show { display: block; }
+
+    .form-error {
+      display: none;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 0.85rem;
+      color: #DC2626;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .form-error.show { display: block; }
+
+    /* ── CARD FOOTER (navigation) ───────────────────────────── */
+    .card-footer {
+      padding: 16px 28px 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: var(--gray-400);
+      font-family: var(--font);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 12px 4px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-back:hover { color: var(--gray-600); }
+    .btn-back:disabled { opacity: 0; pointer-events: none; }
+
+    .btn-next {
+      flex: 1;
+      background: var(--coral);
+      color: var(--white);
+      border: none;
+      border-radius: 11px;
+      padding: 15px 24px;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: background 0.15s, transform 0.1s, opacity 0.15s;
+    }
+    .btn-next:hover:not(:disabled) { background: var(--coral-hover); }
+    .btn-next:active:not(:disabled) { transform: scale(0.98); }
+    .btn-next:disabled {
+      background: var(--gray-200);
+      color: var(--gray-400);
+      cursor: not-allowed;
+    }
+
+    /* ── SUCCESS ────────────────────────────────────────────── */
+    #step-success { text-align: center; padding: 12px 0 20px; }
+
+    .success-icon {
+      width: 76px; height: 76px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--purple), var(--coral));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      color: var(--white);
+      animation: popIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--gray-800);
+      margin-bottom: 12px;
+    }
+    .success-body {
+      font-size: 0.92rem;
+      color: var(--gray-600);
+      line-height: 1.65;
+      margin-bottom: 28px;
+      max-width: 340px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .btn-dashboard {
+      display: inline-block;
+      background: var(--purple);
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 11px;
+      padding: 14px 30px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: background 0.15s;
+    }
+    .btn-dashboard:hover { background: var(--purple-dark); }
+
+    /* ── CONFETTI CANVAS ────────────────────────────────────── */
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+      display: none;
+    }
+
+    /* ── SMALL PRINT ────────────────────────────────────────── */
+    .small-print {
+      margin-top: 18px;
+      font-size: 0.76rem;
+      color: var(--gray-400);
+      text-align: center;
+      padding: 0 8px;
+      line-height: 1.5;
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      body          { padding: 14px 12px 48px; }
+      .card-header  { padding: 20px 20px 16px; }
+      .card-body    { padding: 26px 20px 8px; }
+      .card-footer  { padding: 12px 20px 24px; }
+      .step-title   { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a href="/" class="back-link">← View Impact Dashboard</a>
+
+<div class="card">
+
+  <!-- ── HEADER ──────────────────────────────────────────────── -->
+  <div class="card-header">
+    <div class="header-brand">
+      <div class="brand-logo" aria-hidden="true">🎨</div>
+      <div>
+        <div class="brand-name">Seattle Creates</div>
+        <div class="brand-title">Impact Survey</div>
+      </div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:25%"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">Step 1 of 4</span>
+    </div>
+  </div>
+
+  <!-- ── FORM BODY ──────────────────────────────────────────── -->
+  <div class="card-body">
+
+    <!-- STEP 1 — About You -->
+    <div class="step active" id="step-1">
+      <p class="step-eyebrow">Step 1 — About you</p>
+      <h1 class="step-title">Nice to meet you!</h1>
+      <p class="step-sub">Tell us who you are and your role in the Seattle Creates ecosystem.</p>
+
+      <div class="field">
+        <label class="field-label req" for="name">Full name</label>
+        <input type="text" id="name" name="name" placeholder="e.g. Jordan Lee" autocomplete="name" />
+        <span class="field-error" id="name-error">Please enter your name.</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label req">Your role(s) — select all that apply</label>
+        <div class="chip-group" id="role-group"></div>
+        <span class="field-error" id="role-error">Please select at least one role.</span>
+      </div>
+    </div>
+
+    <!-- STEP 2 — Your Journey -->
+    <div class="step" id="step-2">
+      <p class="step-eyebrow">Step 2 — Your journey</p>
+      <h1 class="step-title">Your path with Seattle Creates</h1>
+      <p class="step-sub">Help us understand your history with the program.</p>
+
+      <div class="field">
+        <label class="field-label req">Are you a Seattle Creates alum?</label>
+        <div class="btn-group" id="grp-is_alumni">
+          <label class="btn-opt"><input type="radio" name="is_alumni" value="Yes"><span class="btn-opt-label">Yes</span></label>
+          <label class="btn-opt"><input type="radio" name="is_alumni" value="No"><span class="btn-opt-label">No</span></label>
+        </div>
+        <span class="field-error" id="is_alumni-error">Please select one.</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label req">Have you returned to Seattle Creates after completing the program?</label>
+        <div class="btn-group">
+          <label class="btn-opt"><input type="radio" name="has_returned" value="Yes"><span class="btn-opt-label">Yes</span></label>
+          <label class="btn-opt"><input type="radio" name="has_returned" value="No"><span class="btn-opt-label">No</span></label>
+        </div>
+        <span class="field-error" id="has_returned-error">Please select one.</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label req">Did you become a teaching artist through Seattle Creates?</label>
+        <div class="btn-group">
+          <label class="btn-opt"><input type="radio" name="became_teaching_artist" value="Yes"><span class="btn-opt-label">Yes</span></label>
+          <label class="btn-opt"><input type="radio" name="became_teaching_artist" value="No"><span class="btn-opt-label">No</span></label>
+        </div>
+        <span class="field-error" id="became_teaching_artist-error">Please select one.</span>
+      </div>
+    </div>
+
+    <!-- STEP 3 — Career Wins -->
+    <div class="step" id="step-3">
+      <p class="step-eyebrow">Step 3 — Career wins</p>
+      <h1 class="step-title">Celebrating your success</h1>
+      <p class="step-sub">Tell us about opportunities you've gained through your creative work.</p>
+
+      <div class="field">
+        <label class="field-label req">Have you landed a job, gig, or professional opportunity through or after Seattle Creates?</label>
+        <div class="btn-group">
+          <label class="btn-opt"><input type="radio" name="got_job_or_opportunity" value="Yes"><span class="btn-opt-label">Yes</span></label>
+          <label class="btn-opt"><input type="radio" name="got_job_or_opportunity" value="No"><span class="btn-opt-label">No</span></label>
+        </div>
+        <span class="field-error" id="got_job_or_opportunity-error">Please select one.</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label req">Have you launched a creative business or side hustle?</label>
+        <div class="btn-group">
+          <label class="btn-opt"><input type="radio" name="launched_business" value="Yes"><span class="btn-opt-label">Yes</span></label>
+          <label class="btn-opt"><input type="radio" name="launched_business" value="No"><span class="btn-opt-label">No</span></label>
+        </div>
+        <span class="field-error" id="launched_business-error">Please select one.</span>
+      </div>
+    </div>
+
+    <!-- STEP 4 — What You're Seeking -->
+    <div class="step" id="step-4">
+      <p class="step-eyebrow">Step 4 — What you're seeking</p>
+      <h1 class="step-title">Your creative goals</h1>
+      <p class="step-sub">Help us connect you with the right resources and people.</p>
+
+      <div class="field">
+        <label class="field-label req" for="industry">What industry or creative field are you in?</label>
+        <input type="text" id="industry" name="industry" placeholder="e.g. Music, Film, Visual Art, Dance" />
+        <span class="field-error" id="industry-error">Please tell us your field.</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label req" for="skills_seeking">What skills, knowledge, or connections are you looking for?</label>
+        <textarea id="skills_seeking" name="skills_seeking" placeholder="e.g. Music production, grant writing, networking in the film industry…"></textarea>
+        <span class="field-error" id="skills_seeking-error">Please share what you're looking for.</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label req">Are you interested in mentorship?</label>
+        <div class="btn-group">
+          <label class="btn-opt"><input type="radio" name="wants_mentorship" value="Yes"><span class="btn-opt-label">Yes</span></label>
+          <label class="btn-opt"><input type="radio" name="wants_mentorship" value="Maybe"><span class="btn-opt-label">Maybe</span></label>
+          <label class="btn-opt"><input type="radio" name="wants_mentorship" value="No"><span class="btn-opt-label">No</span></label>
+        </div>
+        <span class="field-error" id="wants_mentorship-error">Please select one.</span>
+      </div>
+
+      <div class="form-error" id="form-error"></div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="step" id="step-success">
+      <div class="success-icon" aria-hidden="true">✓</div>
+      <h1 class="success-title">Thank you!</h1>
+      <p class="success-body">
+        Your response has been recorded. Seattle Creates uses this data to
+        demonstrate impact to funders and build a stronger creative community.
+      </p>
+      <a href="/" class="btn-dashboard">View the Impact Dashboard →</a>
+    </div>
+
+  </div><!-- /.card-body -->
+
+  <!-- ── NAVIGATION ─────────────────────────────────────────── -->
+  <div class="card-footer" id="card-footer">
+    <button class="btn-back" id="btn-back" disabled>Back</button>
+    <button class="btn-next" id="btn-next">Next →</button>
+  </div>
+
+</div><!-- /.card -->
+
+<p class="small-print">No contact info required. Your response helps us grow the program and secure funding.</p>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+"use strict";
+
+const TOTAL_STEPS = 4;
+
+const ROLES = [
+  "Participant", "Teaching Artist", "Industry Mentor",
+  "Speaker", "Volunteer", "Alumni", "Intern", "Apprentice",
+];
+
+// ── STATE ──────────────────────────────────────────────────────────
+let currentStep = 1;
+
+// ── INIT: build role chip group dynamically ────────────────────────
+(function initChips() {
+  const group = document.getElementById("role-group");
+  group.innerHTML = ROLES.map(r => `
+    <label class="chip">
+      <input type="checkbox" name="role" value="${r}" />
+      <span class="chip-label">${r}</span>
+    </label>
+  `).join("");
+})();
+
+// ── PROGRESS ───────────────────────────────────────────────────────
+function updateProgress(step) {
+  document.getElementById("progressFill").style.width = (step / TOTAL_STEPS * 100) + "%";
+  document.getElementById("progressLabel").textContent = `Step ${step} of ${TOTAL_STEPS}`;
+}
+
+// ── SHOW STEP ──────────────────────────────────────────────────────
+function showStep(n, backward) {
+  const prev = document.getElementById("step-" + currentStep);
+  const next = document.getElementById("step-" + n);
+
+  if (prev) prev.classList.remove("active", "back-enter");
+
+  if (next) {
+    next.className = "step " + (backward ? "back-enter" : "active");
+  }
+
+  currentStep = n;
+  updateProgress(n);
+  document.getElementById("btn-back").disabled = (n === 1);
+  document.getElementById("btn-next").textContent = (n === TOTAL_STEPS) ? "Submit →" : "Next →";
+}
+
+// ── VALIDATION ─────────────────────────────────────────────────────
+function clearErrors() {
+  document.querySelectorAll(".field-error").forEach(el => el.classList.remove("show"));
+  document.querySelectorAll(".err").forEach(el => el.classList.remove("err"));
+}
+
+function fieldError(id) {
+  const el = document.getElementById(id + "-error");
+  if (el) el.classList.add("show");
+}
+
+function validateStep(step) {
+  clearErrors();
+  let ok = true;
+
+  if (step === 1) {
+    if (!document.getElementById("name").value.trim()) {
+      document.getElementById("name").classList.add("err");
+      fieldError("name");
+      ok = false;
+    }
+    if (!document.querySelectorAll('input[name="role"]:checked').length) {
+      fieldError("role");
+      ok = false;
+    }
+  }
+
+  if (step === 2) {
+    ["is_alumni", "has_returned", "became_teaching_artist"].forEach(f => {
+      if (!document.querySelector(`input[name="${f}"]:checked`)) {
+        fieldError(f);
+        ok = false;
+      }
+    });
+  }
+
+  if (step === 3) {
+    ["got_job_or_opportunity", "launched_business"].forEach(f => {
+      if (!document.querySelector(`input[name="${f}"]:checked`)) {
+        fieldError(f);
+        ok = false;
+      }
+    });
+  }
+
+  if (step === 4) {
+    const industry = document.getElementById("industry");
+    const skills   = document.getElementById("skills_seeking");
+    if (!industry.value.trim()) { industry.classList.add("err"); fieldError("industry"); ok = false; }
+    if (!skills.value.trim())   { skills.classList.add("err");   fieldError("skills_seeking"); ok = false; }
+    if (!document.querySelector('input[name="wants_mentorship"]:checked')) {
+      fieldError("wants_mentorship");
+      ok = false;
+    }
+  }
+
+  return ok;
+}
+
+// ── COLLECT DATA ───────────────────────────────────────────────────
+function collectData() {
+  const pick = name => (document.querySelector(`input[name="${name}"]:checked`) || {}).value || "";
+  return {
+    name:                    document.getElementById("name").value.trim(),
+    role:                    [...document.querySelectorAll('input[name="role"]:checked')].map(el => el.value),
+    is_alumni:               pick("is_alumni"),
+    has_returned:            pick("has_returned"),
+    became_teaching_artist:  pick("became_teaching_artist"),
+    got_job_or_opportunity:  pick("got_job_or_opportunity"),
+    launched_business:       pick("launched_business"),
+    wants_mentorship:        pick("wants_mentorship"),
+    industry:                document.getElementById("industry").value.trim(),
+    skills_seeking:          document.getElementById("skills_seeking").value.trim(),
+  };
+}
+
+// ── SUBMIT ─────────────────────────────────────────────────────────
+async function submitForm() {
+  const btn      = document.getElementById("btn-next");
+  const errBox   = document.getElementById("form-error");
+  btn.disabled   = true;
+  btn.textContent = "Submitting…";
+  errBox.classList.remove("show");
+
+  try {
+    const res  = await fetch("/api/submit", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(collectData()),
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      errBox.textContent = json.error || "Something went wrong. Please try again.";
+      errBox.classList.add("show");
+      btn.disabled    = false;
+      btn.textContent = "Submit →";
+      return;
+    }
+
+    // ── Success ──
+    document.querySelectorAll(".step").forEach(s => s.classList.remove("active", "back-enter"));
+    document.getElementById("step-success").classList.add("active");
+    document.getElementById("card-footer").style.display = "none";
+    document.getElementById("progressFill").style.width = "100%";
+    document.getElementById("progressLabel").textContent = "Done!";
+    startConfetti();
+
+  } catch {
+    errBox.textContent = "Network error — check your connection and try again.";
+    errBox.classList.add("show");
+    btn.disabled    = false;
+    btn.textContent = "Submit →";
+  }
+}
+
+// ── CONFETTI ───────────────────────────────────────────────────────
+function startConfetti() {
+  const canvas = document.getElementById("confetti-canvas");
+  const ctx    = canvas.getContext("2d");
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.display = "block";
+
+  const COLORS = ["#6B3FA0","#F4704B","#3B82F6","#10B981","#F59E0B","#EF4444","#8B5CF6"];
+  const parts  = Array.from({ length: 130 }, () => ({
+    x:   Math.random() * canvas.width,
+    y:   -20 - Math.random() * 120,
+    vx:  (Math.random() - 0.5) * 5,
+    vy:  Math.random() * 4 + 2,
+    g:   0.055 + Math.random() * 0.04,
+    w:   Math.random() * 10 + 4,
+    h:   Math.random() * 5 + 3,
+    rot: Math.random() * 360,
+    rv:  (Math.random() - 0.5) * 9,
+    col: COLORS[Math.floor(Math.random() * COLORS.length)],
+  }));
+
+  let frame = 0;
+  const MAX  = 210;
+
+  (function draw() {
+    if (frame >= MAX) { canvas.style.display = "none"; return; }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const alpha = Math.max(0, 1 - frame / MAX);
+    parts.forEach(p => {
+      p.x  += p.vx; p.y  += p.vy; p.vy += p.g; p.rot += p.rv;
+      if (p.y > canvas.height + 20) { p.y = -20; p.x = Math.random() * canvas.width; }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle   = p.col;
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+    frame++;
+    requestAnimationFrame(draw);
+  })();
+}
+
+// ── NAV HANDLERS ───────────────────────────────────────────────────
+document.getElementById("btn-next").addEventListener("click", async () => {
+  if (!validateStep(currentStep)) return;
+  if (currentStep < TOTAL_STEPS) {
+    showStep(currentStep + 1, false);
+  } else {
+    await submitForm();
+  }
+});
+
+document.getElementById("btn-back").addEventListener("click", () => {
+  if (currentStep > 1) { clearErrors(); showStep(currentStep - 1, true); }
+});
+
+// ── INITIAL PROGRESS ───────────────────────────────────────────────
+updateProgress(1);
+</script>
+</body>
+</html>
